@@ -7,7 +7,7 @@ import { MarkdownEditContainer } from './style'
 import showdown from 'showdown'
 
 const converter = new showdown.Converter()  // showdown.js的实例对象
-// let editTimer: any;  // 编辑输入的定时器
+let editTimer: any;  // 编辑输入的定时器
 let scrolling: 0 | 1 | 2 = 0   // 当前滚动块。0: both none ; 1: edit ; 2: show
 let scrollTimer: any;  // 改变scrolling值得定时器
 
@@ -19,12 +19,12 @@ export default function MarkdownEdit() {
     
     // markdown解析函数（做了防抖处理）
     const parse = useCallback((text) => {
-        // if(editTimer) clearTimeout(editTimer);
-        // editTimer = setTimeout(() => {
+        if(editTimer) clearTimeout(editTimer);
+        editTimer = setTimeout(() => {
             
-        //     clearTimeout(editTimer)
+            clearTimeout(editTimer)
             setHtmlString(converter.makeHtml(text))
-        // }, 500)
+        }, 100)
     }, [])
 
     // 编辑区内容改变
@@ -83,7 +83,6 @@ export default function MarkdownEdit() {
                 ref={editRef}
                 onChange={editChange}
                 onScroll={handleScroll}
-                // onKeyDown={handleKeyDown}
                 value={value}
             />
             <div 
