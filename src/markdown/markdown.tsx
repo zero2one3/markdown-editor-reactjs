@@ -5,9 +5,12 @@ import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import { MarkdownEditContainer } from './style'
 import showdown from 'showdown'
+import setOptions from './options'
 
 const converter = new showdown.Converter()  // showdown.js的实例对象
-let editTimer: any;  // 编辑输入的定时器
+setOptions(converter)
+console.log(converter.getOptions());
+
 let scrolling: 0 | 1 | 2 = 0   // 当前滚动块。0: both none ; 1: edit ; 2: show
 let scrollTimer: any;  // 改变scrolling值得定时器
 
@@ -17,15 +20,8 @@ export default function MarkdownEdit() {
     const [value, setValue] = useState('')  // 编辑框里输入的内容
     const [htmlString, setHtmlString] = useState('')    // 渲染对应的htmlString  
     
-    // markdown解析函数（做了防抖处理）
-    const parse = useCallback((text) => {
-        if(editTimer) clearTimeout(editTimer);
-        editTimer = setTimeout(() => {
-            
-            clearTimeout(editTimer)
-            setHtmlString(converter.makeHtml(text))
-        }, 100)
-    }, [])
+    // markdown解析函数
+    const parse = useCallback((text) => setHtmlString(converter.makeHtml(text)), [])
 
     // 编辑区内容改变
     const editChange = useCallback((event) => {
@@ -73,7 +69,6 @@ export default function MarkdownEdit() {
     useEffect(() => {
         // 检测页面代码块并标记高亮
         hljs.highlightAll()
-        
     }, [htmlString])
 
     return (

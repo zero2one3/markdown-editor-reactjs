@@ -1,4 +1,4 @@
-import MarkdownEdit from './markdown'
+import MarkdownEdit from './markdown/markdown'
 
 function App() {
   return (

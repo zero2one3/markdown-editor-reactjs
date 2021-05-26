@@ -19,9 +19,10 @@ export const MarkdownEditContainer = styled.div`
     .show {
         height: 100%;
         width: 50%;
-        padding: 20px;
+        padding: 20px 20px 40px 20px;
         overflow: auto;
         box-sizing: border-box;
     }
   
 `
+
