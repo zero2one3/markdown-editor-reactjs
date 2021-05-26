@@ -6,6 +6,8 @@ import 'highlight.js/styles/github.css'
 import { MarkdownEditContainer } from './style'
 import showdown from 'showdown'
 import setOptions from './options'
+import NavBar from 'src/components/navbar/index'
+import 'antd/dist/antd.css';
 
 const converter = new showdown.Converter()  // showdown.js的实例对象
 setOptions(converter)
@@ -73,20 +75,23 @@ export default function MarkdownEdit() {
 
     return (
         <MarkdownEditContainer>
-            <textarea 
-                className="edit" 
-                ref={editRef}
-                onChange={editChange}
-                onScroll={handleScroll}
-                value={value}
-            />
-            <div 
-                id="write"
-                className="show" 
-                ref={showRef}
-                onScroll={handleScroll}
-                dangerouslySetInnerHTML={{ __html: htmlString }}
-            />
+            <NavBar/>
+            <main className="markdown-main">
+                <textarea 
+                    className="edit" 
+                    ref={editRef}
+                    onChange={editChange}
+                    onScroll={handleScroll}
+                    value={value}
+                />
+                <div 
+                    id="write"
+                    className="show" 
+                    ref={showRef}
+                    onScroll={handleScroll}
+                    dangerouslySetInnerHTML={{ __html: htmlString }}
+                />
+            </main>
         </MarkdownEditContainer>
     )
 }
