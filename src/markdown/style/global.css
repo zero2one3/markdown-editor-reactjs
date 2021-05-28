@@ -1,0 +1,11 @@
+.item-group-list-container .ant-dropdown-menu-item-group-list {
+        max-height: 243px;
+        overflow: auto;
+        margin: 0;
+        padding: 0 8px;
+}
+
+.write-spin .ant-spin-container {
+        width: 100%;
+        height: 100%;
+}

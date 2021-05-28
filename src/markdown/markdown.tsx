@@ -2,12 +2,13 @@ import React, { useState, useCallback, useRef, useEffect } from 'react'
 import './theme/global.css'
 import './theme/purple.css'
 import hljs from 'highlight.js'
-import 'highlight.js/styles/github.css'
-import { MarkdownEditContainer } from './style'
+import { Spin } from 'antd'
+import { MarkdownEditContainer } from './style/style'
 import showdown from 'showdown'
 import setOptions from './options'
 import NavBar from 'src/components/navbar/index'
 import 'antd/dist/antd.css';
+import './style/global.css'
 
 const converter = new showdown.Converter()  // showdown.js的实例对象
 setOptions(converter)
@@ -20,7 +21,9 @@ export default function MarkdownEdit() {
     const showRef = useRef<any>(null)
     const [value, setValue] = useState('')  // 编辑框里输入的内容
     const [htmlString, setHtmlString] = useState('')    // 渲染对应的htmlString  
-    
+    const [fullScreen, setFullScreen] = useState(false)  // 展示区是否全屏
+    const [loading, setLoading] = useState(true)  // 展示区是否正在加载中
+
     // markdown解析函数
     const parse = useCallback((text) => setHtmlString(converter.makeHtml(text)), [])
 
@@ -81,23 +84,33 @@ export default function MarkdownEdit() {
                 value={value}
                 editElement={editRef}
                 editChange={editChange}
+                fullScreen={fullScreen}
+                setFullScreen={setFullScreen}
+                setLoading={setLoading}
             />
-            <main className="markdown-main">
-                <textarea 
-                    className="edit" 
-                    ref={editRef}
-                    onChange={editChange}
-                    onScroll={handleScroll}
-                    value={value}
-                />
-                <div 
-                    id="write"
-                    className="show" 
-                    ref={showRef}
-                    onScroll={handleScroll}
-                    dangerouslySetInnerHTML={{ __html: htmlString }}
-                />
-            </main>
+            <Spin 
+                spinning={loading} 
+                wrapperClassName="write-spin" 
+                tip="更新主题中..."
+            >
+                <main className="markdown-main">
+                    <textarea 
+                        id="markdown-editor-reactjs-edit"
+                        className={`${fullScreen ? 'hide' : ''}`} 
+                        ref={editRef}
+                        onChange={editChange}
+                        onScroll={handleScroll}
+                        value={value}
+                    />
+                    <div 
+                        id="write"
+                        className={`${fullScreen ? 'fullScreen': ''}`}
+                        ref={showRef}
+                        onScroll={handleScroll}
+                        dangerouslySetInnerHTML={{ __html: htmlString }}
+                    />
+                </main>
+            </Spin>
         </MarkdownEditContainer>
     )
 }
