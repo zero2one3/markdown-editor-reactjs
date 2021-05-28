@@ -16,7 +16,11 @@ export const NavBarContainer = styled.nav`
         font-size: 17px;
 
         &:hover {
-            background-color: lightblue;
+            background-color: #eee;
+        }
+
+        &.code {
+            padding: 5px 0;
         }
     }
 

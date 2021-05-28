@@ -11,7 +11,6 @@ import 'antd/dist/antd.css';
 
 const converter = new showdown.Converter()  // showdown.js的实例对象
 setOptions(converter)
-console.log(converter.getOptions());
 
 let scrolling: 0 | 1 | 2 = 0   // 当前滚动块。0: both none ; 1: edit ; 2: show
 let scrollTimer: any;  // 改变scrolling值得定时器
@@ -26,11 +25,14 @@ export default function MarkdownEdit() {
     const parse = useCallback((text) => setHtmlString(converter.makeHtml(text)), [])
 
     // 编辑区内容改变
-    const editChange = useCallback((event) => {
-        let value = event.target.value
-        
-        setValue(value)
-        parse(value)
+    const editChange = useCallback((event, value?: string) => {
+        let newValue;
+
+        if(event) newValue = event.target.value;
+        else newValue = value
+
+        setValue(newValue)
+        parse(newValue)
     }, [])
 
     // 区间进行滚动
@@ -75,7 +77,11 @@ export default function MarkdownEdit() {
 
     return (
         <MarkdownEditContainer>
-            <NavBar/>
+            <NavBar
+                value={value}
+                editElement={editRef}
+                editChange={editChange}
+            />
             <main className="markdown-main">
                 <textarea 
                     className="edit" 
