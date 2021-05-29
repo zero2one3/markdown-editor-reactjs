@@ -226,6 +226,10 @@ export default function NavBar(props: PropsType) {
         newLink.setAttribute('class', 'highlightjs-style-link')
         newLink.setAttribute('href', `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/${codeHighLightTheme}.min.css`)
         newLink.onload = () => props.setLoading(false);
+        newLink.onerror = () => {
+            props.setLoading(false);
+            message.error('主题获取失败，请稍后重试或尝试其它主题')
+        }
         head.appendChild(newLink)
     }, [codeHighLightTheme])
 
