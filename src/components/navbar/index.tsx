@@ -22,7 +22,8 @@ interface PropsType {
 }
 
 export default function NavBar(props: PropsType) {
-    const [codeHighLightTheme, setCodeHighLightTheme] = useState('github')  // 当前代码高亮的主题
+    const [codeHighLightTheme, setCodeHighLightTheme] = useState('railscasts')  // 当前代码高亮的主题
+    const [markdownTheme, setMarkdownTheme] = useState('github')  // 当前markdown的主题
 
     // 获取光标所在位置或所选位置
     const getCursorPosition = useCallback(() => {
@@ -119,37 +120,36 @@ export default function NavBar(props: PropsType) {
     // 代码高亮选择菜单
     const codeHighLightMenu = (
         <Menu onClick={selectCodeHighLightTheme}>
-            <ItemGroup title="代码高亮主题" className="item-group-list-container">
-                <Item key="github">github</Item>
-                <Item key="railscasts">railscasts</Item>
-                <Item key="androidstudio">androidstudio</Item>
-                <Item key="dracula">dracula</Item>
-                <Item key="atom-one-dark">atom-one-dark</Item>
-                <Item key="atom-one-light">atom-one-light</Item>
-                <Item key="monokai-sublime">monokai-sublime</Item>
-                <Item key="tomorrow">tomorrow</Item>
-                <Item key="solarized-dark">solarized-dark</Item>
-                <Item key="solarized-light">solarized-light</Item>
-                <Item key="color-brewer">color-brewer</Item>
-                <Item key="zenburn">zenburn</Item>
-                <Item key="agate">agate</Item>
+            <ItemGroup title="代码高亮主题" className="item-group-list-container code-highlight-theme-menu">
+                <Item key="github" className={`${codeHighLightTheme === 'github' && 'active'}`}>github</Item>
+                <Item key="railscasts" className={`${codeHighLightTheme === 'railscasts' && 'active'}`}>railscasts</Item>
+                <Item key="androidstudio" className={`${codeHighLightTheme === 'androidstudio' && 'active'}`}>androidstudio</Item>
+                <Item key="dracula" className={`${codeHighLightTheme === 'dracula' && 'active'}`}>dracula</Item>
+                <Item key="atom-one-dark" className={`${codeHighLightTheme === 'atom-one-dark' && 'active'}`}>atom-one-dark</Item>
+                <Item key="atom-one-light" className={`${codeHighLightTheme === 'atom-one-light' && 'active'}`}>atom-one-light</Item>
+                <Item key="monokai-sublime" className={`${codeHighLightTheme === 'monokai-sublime' && 'active'}`}>monokai-sublime</Item>
+                <Item key="tomorrow" className={`${codeHighLightTheme === 'tomorrow' && 'active'}`}>tomorrow</Item>
+                <Item key="solarized-dark" className={`${codeHighLightTheme === 'solarized-dark' && 'active'}`}>solarized-dark</Item>
+                <Item key="solarized-light" className={`${codeHighLightTheme === 'solarized-light' && 'active'}`}>solarized-light</Item>
+                <Item key="color-brewer" className={`${codeHighLightTheme === 'color-brewer' && 'active'}`}>color-brewer</Item>
+                <Item key="zenburn" className={`${codeHighLightTheme === 'zenburn' && 'active'}`}>zenburn</Item>
+                <Item key="agate" className={`${codeHighLightTheme === 'agate' && 'active'}`}>agate</Item>
             </ItemGroup>
         </Menu>
     )
 
     // 选择markdown主题
     const selectMarkdownTheme = ({ key } : { key: string }) => {
-        console.log(key);
+        setMarkdownTheme(key)
     }
 
     // markdown主题选择菜单
     const markdownThemeMenu = (
         <Menu onClick={selectMarkdownTheme}>
-            <ItemGroup title="markdown主题" className="item-group-list-container">
-                <Item key="github">Github</Item>
-                <Item key="123">主题1</Item>
-                <Item key="234">主题2</Item>
-                <Item key="345">主题3</Item>
+            <ItemGroup title="markdown主题" className="item-group-list-container markdown-theme-menu">
+                <Item key="github" className={`${markdownTheme === 'github' && 'active'}`}>github</Item>
+                <Item key="purple" className={`${markdownTheme === 'purple' && 'active'}`}>purple</Item>
+                <Item key="orangeheart" className={`${markdownTheme === 'orangeheart' && 'active'}`}>orangeheart</Item>
             </ItemGroup>
         </Menu>
     )

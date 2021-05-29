@@ -1,3 +1,4 @@
+/* 修改antd dropdown组件的最大高度，并使其形成滚动条 */
 .item-group-list-container .ant-dropdown-menu-item-group-list {
         max-height: 243px;
         overflow: auto;
@@ -5,7 +6,19 @@
         padding: 0 8px;
 }
 
+/* 修改antd加载的内嵌容器样式 */
 .write-spin .ant-spin-container {
         width: 100%;
         height: 100%;
+}
+
+/* 去除任务列表前面的小黑点  */
+li.task-list-item {
+        list-style: none;
+}
+
+/* antd的dropdown组件选中的选项的样式 */
+.code-highlight-theme-menu .active, .markdown-theme-menu .active {
+        background-color: rgb(225, 248, 222);
+        border-radius: 3px;
 }

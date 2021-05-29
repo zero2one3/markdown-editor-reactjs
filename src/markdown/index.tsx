@@ -1,17 +1,12 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import './theme/global.css'
-import './theme/purple.css'
-import hljs from 'highlight.js'
+import './theme/orangeheart.css'
 import { Spin } from 'antd'
 import { MarkdownEditContainer } from './style/style'
-import showdown from 'showdown'
-import setOptions from './options'
 import NavBar from 'src/components/navbar/index'
 import 'antd/dist/antd.css';
 import './style/global.css'
-
-const converter = new showdown.Converter()  // showdown.js的实例对象
-setOptions(converter)
+import md from './markdown'
 
 let scrolling: 0 | 1 | 2 = 0   // 当前滚动块。0: both none ; 1: edit ; 2: show
 let scrollTimer: any;  // 改变scrolling值得定时器
@@ -25,7 +20,7 @@ export default function MarkdownEdit() {
     const [loading, setLoading] = useState(true)  // 展示区是否正在加载中
 
     // markdown解析函数
-    const parse = useCallback((text) => setHtmlString(converter.makeHtml(text)), [])
+    const parse = useCallback((text) => setHtmlString(md.render(text)), [])
 
     // 编辑区内容改变
     const editChange = useCallback((event, value?: string) => {
@@ -72,11 +67,6 @@ export default function MarkdownEdit() {
         let { scrollHeight, scrollTop, clientHeight } = el
         return scrollTop / (scrollHeight - clientHeight)
     }, [])
-
-    useEffect(() => {
-        // 检测页面代码块并标记高亮
-        hljs.highlightAll()
-    }, [htmlString])
 
     return (
         <MarkdownEditContainer>
