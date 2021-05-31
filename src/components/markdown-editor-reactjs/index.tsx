@@ -3,9 +3,10 @@ import './theme/global.css'
 import './theme/orangeheart.css'
 import { Spin } from 'antd'
 import { MarkdownEditContainer } from './style/style'
-import NavBar from 'src/components/navbar/index'
+import NavBar from './navbar/index'
 import 'antd/dist/antd.css';
 import './style/global.css'
+import { getCursorPosition } from './utils'
 import md from './markdown'
 
 let scrolling: 0 | 1 | 2 = 0   // 当前滚动块。0: both none ; 1: edit ; 2: show
@@ -68,6 +69,20 @@ export default function MarkdownEdit() {
         return scrollTop / (scrollHeight - clientHeight)
     }, [])
 
+    // 控制键盘的按键
+    // const handleKeyDown = (event: any) => {
+    //     console.log(event);
+    //     let { keyCode } = event
+    //     let [start, end] = getCursorPosition(editRef.current)
+    //     switch(keyCode) {
+    //         case 9:   // Tab缩进
+    //             let newValue = value.slice(0, start) + '    ' + value.slice(start)
+    //             editChange('', newValue)
+    //             event.preventDefault()
+    //             break;
+    //     }
+    // }
+
     return (
         <MarkdownEditContainer>
             <NavBar
@@ -90,6 +105,7 @@ export default function MarkdownEdit() {
                         ref={editRef}
                         onChange={editChange}
                         onScroll={handleScroll}
+                        // onKeyDown={handleKeyDown}
                         value={value}
                     />
                     <div 

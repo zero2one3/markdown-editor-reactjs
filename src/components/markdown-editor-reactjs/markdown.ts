@@ -13,7 +13,7 @@ const md: any = new MarkdownIt({
         }
     
         return '<pre class="hljs"><code>' + md.utils.escapeHtml(code) + '</code></pre>';
-      }
+    }
 })
 .use(require('markdown-it-task-checkbox'),{
     disabled: true,

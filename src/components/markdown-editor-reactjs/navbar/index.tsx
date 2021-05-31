@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react'
 import { NavBarContainer } from './style'
 import { Tooltip, Dropdown, Menu, message } from 'antd'
-import { hash } from 'src/markdown/utils'
+import { hash, getCursorPosition } from '../utils'
 import { 
     BoldOutlined, ItalicOutlined, StrikethroughOutlined, OrderedListOutlined,
     UnorderedListOutlined, CarryOutOutlined, LinkOutlined, TableOutlined,
@@ -25,15 +25,9 @@ export default function NavBar(props: PropsType) {
     const [codeHighLightTheme, setCodeHighLightTheme] = useState('railscasts')  // 当前代码高亮的主题
     const [markdownTheme, setMarkdownTheme] = useState('github')  // 当前markdown的主题
 
-    // 获取光标所在位置或所选位置
-    const getCursorPosition = useCallback(() => {
-        let { selectionStart, selectionEnd } = props.editElement.current
-        return [selectionStart, selectionEnd]
-    }, [])
-
     // 控制两边加符号的语法，例如：**粗体**、*斜体*、~~删除文本~~ 等等
     const handleTwoSideSymbol = useCallback((value, symbol, txt) => {
-        let [start, end] = getCursorPosition()
+        let [start, end] = getCursorPosition(props.editElement.current)
         let newValue = start === end
                         ? value.slice(0, start) + `${symbol}${txt}${symbol}` + value.slice(end)
                         : value.slice(0, start) + symbol + value.slice(start, end) + symbol + value.slice(end)
@@ -42,7 +36,7 @@ export default function NavBar(props: PropsType) {
 
     // 添加列表语法，例如：- 无序列表、1. 有序列表、- [x] 任务列表 等等
     const addList = useCallback((value, symbol, txt) => {
-        let [start, end] = getCursorPosition()
+        let [start, end] = getCursorPosition(props.editElement.current)
         let newValue = start === end
                         ? `${value.slice(0, start)}\n${symbol} ${txt}\n${value.slice(end)}`
                         : `${value.slice(0, start)}\n${symbol} ${value.slice(start, end)}\n${value.slice(end)}`
@@ -52,7 +46,7 @@ export default function NavBar(props: PropsType) {
 
     // 添加代码块
     const addCodeBlock = ({ key }: { key: string }) => {
-        let [start, end] = getCursorPosition()
+        let [start, end] = getCursorPosition(props.editElement.current)
         let newValue = start === end
                         ? `${props.value.slice(0, start)}\n\`\`\`${key}\n\n\`\`\`\n${props.value.slice(end)}`
                         : `${props.value.slice(0, start)}\n\`\`\`${key}\n${props.value.slice(start, end)}\n\`\`\`\n${props.value.slice(end)}`
@@ -88,7 +82,7 @@ export default function NavBar(props: PropsType) {
 
     // 添加链接
     const addLink = () => {
-        let [start, end] = getCursorPosition()
+        let [start, end] = getCursorPosition(props.editElement.current)
         let newValue = start === end
                         ? `${props.value.slice(0, start)}[链接描述文字](https://lpyexplore.gitee.io/blog/)${props.value.slice(end)}`
                         : `${props.value.slice(0, start)}[${props.value.slice(start, end)}](https://lpyexplore.gitee.io/blog/)${props.value.slice(end)}`
@@ -98,7 +92,7 @@ export default function NavBar(props: PropsType) {
 
     // 添加表格
     const addTable = () => {
-        let [start, end] = getCursorPosition()
+        let [start, end] = getCursorPosition(props.editElement.current)
         let newValue = start === end
                         ? `${props.value.slice(0, start)}\n| | |\n|--|--|\n| | |${props.value.slice(end)}`
                         : `${props.value.slice(0, start)}\n|${props.value.slice(start, end)}| |\n|--|--|\n| | |${props.value.slice(end)}`

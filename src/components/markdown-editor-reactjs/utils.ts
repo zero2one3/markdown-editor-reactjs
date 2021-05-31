@@ -1,3 +1,4 @@
+// 生成哈希串
 export function hash(len: number = 10) {
     let numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
     let chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
@@ -13,4 +14,10 @@ export function hash(len: number = 10) {
     }
 
     return hashString
+}
+
+// 获取光标位置
+export function getCursorPosition(el: HTMLTextAreaElement) {
+    let { selectionStart, selectionEnd } = el
+    return [selectionStart, selectionEnd]
 }
