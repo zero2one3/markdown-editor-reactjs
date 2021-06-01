@@ -22,6 +22,7 @@ const md: any = new MarkdownIt({
     idPrefix: 'cbx_',
     ulClass: 'task-list',
     liClass: 'task-list-item'
-});   // 任务列表插件
+})   // 任务列表插件
+
 
 export default md

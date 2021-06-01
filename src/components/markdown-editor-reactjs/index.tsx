@@ -1,6 +1,4 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import './theme/global.css'
-import './theme/orangeheart.css'
 import { Spin } from 'antd'
 import { MarkdownEditContainer } from './style/style'
 import NavBar from './navbar/index'
@@ -8,31 +6,21 @@ import 'antd/dist/antd.css';
 import './style/global.css'
 import { getCursorPosition } from './utils'
 import md from './markdown'
+import { PropsType } from './types'
 
 let scrolling: 0 | 1 | 2 = 0   // 当前滚动块。0: both none ; 1: edit ; 2: show
 let scrollTimer: any;  // 改变scrolling值得定时器
 
-export default function MarkdownEdit() {
+export default function MarkdownEdit(props: PropsType) {
     const editRef = useRef<any>(null)
     const showRef = useRef<any>(null)
-    const [value, setValue] = useState('')  // 编辑框里输入的内容
+    const [value, setValue] = useState(props.initValue ? props.initValue : '')  // 编辑框里输入的内容
     const [htmlString, setHtmlString] = useState('')    // 渲染对应的htmlString  
     const [fullScreen, setFullScreen] = useState(false)  // 展示区是否全屏
     const [loading, setLoading] = useState(true)  // 展示区是否正在加载中
 
     // markdown解析函数
     const parse = useCallback((text) => setHtmlString(md.render(text)), [])
-
-    // 编辑区内容改变
-    const editChange = useCallback((event, value?: string) => {
-        let newValue;
-
-        if(event) newValue = event.target.value;
-        else newValue = value
-
-        setValue(newValue)
-        parse(newValue)
-    }, [])
 
     // 区间进行滚动
     const handleScroll = useCallback((event) => {
@@ -83,12 +71,17 @@ export default function MarkdownEdit() {
     //     }
     // }
 
+    // value改变，驱动htmlString的改变
+    useEffect(() => {
+        setHtmlString(md.render(value))
+    }, [value])
+
     return (
         <MarkdownEditContainer>
             <NavBar
                 value={value}
                 editElement={editRef}
-                editChange={editChange}
+                setValue={setValue}
                 fullScreen={fullScreen}
                 setFullScreen={setFullScreen}
                 setLoading={setLoading}
@@ -103,7 +96,7 @@ export default function MarkdownEdit() {
                         id="markdown-editor-reactjs-edit"
                         className={`${fullScreen ? 'hide' : ''}`} 
                         ref={editRef}
-                        onChange={editChange}
+                        onChange={(e) => setValue(e.target.value)}
                         onScroll={handleScroll}
                         // onKeyDown={handleKeyDown}
                         value={value}

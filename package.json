@@ -1,10 +1,15 @@
 {
-  "name": "rollup-demo",
-  "version": "1.0.0",
+  "name": "markdown-editor-reactjs",
+  "version": "1.0.2",
   "main": "lib/bundle.js",
   "license": "MIT",
-  "description": "",
-  "keywords": [],
+  "description": "A makrdown editor for react.js",
+  "keywords": [
+    "markdown",
+    "editor",
+    "react",
+    "javascript"
+  ],
   "scripts": {
     "build": "yarn run rollup -c",
     "start": "yarn run rollup -c -w"

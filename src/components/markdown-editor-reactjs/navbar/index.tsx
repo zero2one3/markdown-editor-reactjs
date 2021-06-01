@@ -14,7 +14,7 @@ const { Item, ItemGroup } = Menu
 
 interface PropsType {
     value: string;
-    editChange: (event: any, value?: string) => void;
+    setValue: (value: string) => void;
     editElement: any;
     fullScreen: boolean;
     setFullScreen: (fullScreen: boolean) => void;
@@ -23,7 +23,7 @@ interface PropsType {
 
 export default function NavBar(props: PropsType) {
     const [codeHighLightTheme, setCodeHighLightTheme] = useState('railscasts')  // 当前代码高亮的主题
-    const [markdownTheme, setMarkdownTheme] = useState('github')  // 当前markdown的主题
+    const [markdownTheme, setMarkdownTheme] = useState('maize')  // 当前markdown的主题
 
     // 控制两边加符号的语法，例如：**粗体**、*斜体*、~~删除文本~~ 等等
     const handleTwoSideSymbol = useCallback((value, symbol, txt) => {
@@ -31,7 +31,7 @@ export default function NavBar(props: PropsType) {
         let newValue = start === end
                         ? value.slice(0, start) + `${symbol}${txt}${symbol}` + value.slice(end)
                         : value.slice(0, start) + symbol + value.slice(start, end) + symbol + value.slice(end)
-        props.editChange('', newValue)
+        props.setValue(newValue)
     }, [getCursorPosition])
 
     // 添加列表语法，例如：- 无序列表、1. 有序列表、- [x] 任务列表 等等
@@ -41,7 +41,7 @@ export default function NavBar(props: PropsType) {
                         ? `${value.slice(0, start)}\n${symbol} ${txt}\n${value.slice(end)}`
                         : `${value.slice(0, start)}\n${symbol} ${value.slice(start, end)}\n${value.slice(end)}`
 
-        props.editChange('', newValue)
+        props.setValue(newValue)
     }, [getCursorPosition])
 
     // 添加代码块
@@ -51,7 +51,7 @@ export default function NavBar(props: PropsType) {
                         ? `${props.value.slice(0, start)}\n\`\`\`${key}\n\n\`\`\`\n${props.value.slice(end)}`
                         : `${props.value.slice(0, start)}\n\`\`\`${key}\n${props.value.slice(start, end)}\n\`\`\`\n${props.value.slice(end)}`
 
-        props.editChange('', newValue)
+        props.setValue(newValue)
     }
 
     // 代码块的列表元素
@@ -87,7 +87,7 @@ export default function NavBar(props: PropsType) {
                         ? `${props.value.slice(0, start)}[链接描述文字](https://lpyexplore.gitee.io/blog/)${props.value.slice(end)}`
                         : `${props.value.slice(0, start)}[${props.value.slice(start, end)}](https://lpyexplore.gitee.io/blog/)${props.value.slice(end)}`
 
-        props.editChange('', newValue)
+        props.setValue(newValue)
     }
 
     // 添加表格
@@ -97,12 +97,16 @@ export default function NavBar(props: PropsType) {
                         ? `${props.value.slice(0, start)}\n| | |\n|--|--|\n| | |${props.value.slice(end)}`
                         : `${props.value.slice(0, start)}\n|${props.value.slice(start, end)}| |\n|--|--|\n| | |${props.value.slice(end)}`
 
-        props.editChange('', newValue)
+        props.setValue(newValue)
     }
 
     // 添加图片
     const addPhoto = () => {
-        
+        let [start, end] = getCursorPosition(props.editElement.current)
+        let newValue = start === end
+                        ? `${props.value.slice(0, start)}\n![图片描述](url)\n${props.value.slice(end)}`
+                        : `${props.value.slice(0, start)}![${props.value.slice(start, end)}](url)${props.value.slice(end)}`
+        props.setValue(newValue)
     }
 
     // 选择代码高亮主题
@@ -134,6 +138,7 @@ export default function NavBar(props: PropsType) {
 
     // 选择markdown主题
     const selectMarkdownTheme = ({ key } : { key: string }) => {
+        props.setLoading(true)
         setMarkdownTheme(key)
     }
 
@@ -142,8 +147,7 @@ export default function NavBar(props: PropsType) {
         <Menu onClick={selectMarkdownTheme}>
             <ItemGroup title="markdown主题" className="item-group-list-container markdown-theme-menu">
                 <Item key="github" className={`${markdownTheme === 'github' && 'active'}`}>github</Item>
-                <Item key="purple" className={`${markdownTheme === 'purple' && 'active'}`}>purple</Item>
-                <Item key="orangeheart" className={`${markdownTheme === 'orangeheart' && 'active'}`}>orangeheart</Item>
+                <Item key="maize" className={`${markdownTheme === 'maize' && 'active'}`}>maize</Item>
             </ItemGroup>
         </Menu>
     )
@@ -187,7 +191,7 @@ export default function NavBar(props: PropsType) {
             let reader = new FileReader()
             reader.readAsText(files[0])
             reader.onload = () => {
-                props.editChange('', reader.result as string)
+                props.setValue(reader.result as string)
                 message.success('导入成功')
             }
         })
@@ -212,7 +216,7 @@ export default function NavBar(props: PropsType) {
         let head = document.head 
         let oldLink = head.getElementsByClassName('highlightjs-style-link')
 
-        if(oldLink.length) head.removeChild(oldLink[0]);
+        if(oldLink.length) head.removeChild(oldLink[0])
         
         let newLink = document.createElement('link')
         newLink.setAttribute('rel', 'stylesheet')
@@ -225,7 +229,28 @@ export default function NavBar(props: PropsType) {
             message.error('主题获取失败，请稍后重试或尝试其它主题')
         }
         head.appendChild(newLink)
+        
     }, [codeHighLightTheme])
+
+    // 切换markdown样式主题
+    useEffect(() => {
+        let head = document.head
+        let oldLink = head.getElementsByClassName('markdownTheme-style-link')
+
+        if(oldLink.length) head.removeChild(oldLink[0])
+
+        let newLink = document.createElement('link')
+        newLink.setAttribute('rel', 'stylesheet')
+        newLink.setAttribute('type', 'text/css')
+        newLink.setAttribute('class', 'markdownTheme-style-link')
+        newLink.setAttribute('href', `http://lpyexplore.gitee.io/taobao_staticweb/css/theme/${markdownTheme}.css`)
+        newLink.onload = () => props.setLoading(false);
+        newLink.onerror = () => {
+            props.setLoading(false);
+            message.error('主题获取失败，请稍后重试或尝试其它主题')
+        }
+        head.appendChild(newLink)
+    }, [markdownTheme])
 
     return (
         <NavBarContainer>
