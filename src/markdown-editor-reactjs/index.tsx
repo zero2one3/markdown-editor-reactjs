@@ -19,9 +19,6 @@ export default function MarkdownEdit(props: PropsType) {
     const [fullScreen, setFullScreen] = useState(false)  // 展示区是否全屏
     const [loading, setLoading] = useState(true)  // 展示区是否正在加载中
 
-    // markdown解析函数
-    const parse = useCallback((text) => setHtmlString(md.render(text)), [])
-
     // 区间进行滚动
     const handleScroll = useCallback((event) => {
         let { target } = event
