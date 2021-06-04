@@ -73,13 +73,13 @@ export default function MarkdownEdit(props: PropsType) {
                 event.preventDefault()
             }
         } else {   // 单个按键
-            if(keyCode === 0) {  // Tab缩进
+            if(keyCode === 9) {  // Tab缩进
                 let newValue = value.slice(0, start) + '    ' + value.slice(start)
 
                 let selectionStart = start + 4
                 let selectionEnd = end + 4
 
-                setValue(newValue)
+                wrapSetValue(newValue, selectionStart, selectionEnd)
                 setSelectionRange(el, selectionStart, selectionEnd)
                 event.preventDefault()
             }
