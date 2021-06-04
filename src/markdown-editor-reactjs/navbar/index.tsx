@@ -27,7 +27,7 @@ export default function NavBar(props: PropsType) {
 
     // 控制两边加符号的语法，例如：**粗体**、*斜体*、~~删除文本~~ 等等
     const handleTwoSideSymbol = useCallback((value, symbol, txt) => {
-        let el = props.editElement.current
+        let { editElement: { current: el }, setValue } = props
         let [start, end] = getCursorPosition(el)
 
         let newValue = start === end
@@ -37,13 +37,13 @@ export default function NavBar(props: PropsType) {
         let selectionStart = start + symbol.length
         let selectionEnd = start === end ? end + symbol.length + txt.length : end + symbol.length
 
-        props.setValue(newValue, selectionStart, selectionEnd)
+        setValue(newValue, selectionStart, selectionEnd)
         setSelectionRange(el, selectionStart, selectionEnd)  // 选中加粗的文本
     }, [])
 
     // 添加列表语法，例如：- 无序列表、1. 有序列表、- [x] 任务列表 等等
     const addList = useCallback((value, symbol, txt) => {
-        let el = props.editElement.current
+        let { editElement: { current: el }, setValue } = props
         let [start, end] = getCursorPosition(el)
 
         let newValue = start === end
@@ -53,23 +53,23 @@ export default function NavBar(props: PropsType) {
         let selectionStart = start + 2 + symbol.length
         let selectionEnd = start === end ? end + 2 + symbol.length + txt.length : end + 2 + symbol.length
 
-        props.setValue(newValue, selectionStart, selectionEnd)
+        setValue(newValue, selectionStart, selectionEnd)
         setSelectionRange(el, selectionStart, selectionEnd)
     }, [])
 
     // 添加代码块
     const addCodeBlock = ({ key }: { key: string }) => {
-        let el = props.editElement.current
+        let { value, editElement: { current: el }, setValue } = props
         let [start, end] = getCursorPosition(el)
 
         let newValue = start === end
-                        ? `${props.value.slice(0, start)}\n\`\`\`${key}\n\n\`\`\`\n${props.value.slice(end)}`
-                        : `${props.value.slice(0, start)}\n\`\`\`${key}\n${props.value.slice(start, end)}\n\`\`\`\n${props.value.slice(end)}`
+                        ? `${value.slice(0, start)}\n\`\`\`${key}\n\n\`\`\`\n${value.slice(end)}`
+                        : `${value.slice(0, start)}\n\`\`\`${key}\n${value.slice(start, end)}\n\`\`\`\n${value.slice(end)}`
         
         let selectionStart = end + 5 + key.length
         let selectionEnd = end + 5 + key.length
 
-        props.setValue(newValue, selectionStart, selectionEnd)
+        setValue(newValue, selectionStart, selectionEnd)
         setSelectionRange(el, selectionStart, selectionEnd)
     }
 
@@ -101,7 +101,7 @@ export default function NavBar(props: PropsType) {
 
     // 添加链接
     const addLink = () => {
-        let { value, editElement: { current: el } } = props
+        let { value, editElement: { current: el }, setValue } = props
         let [start, end] = getCursorPosition(el)
         let newValue = start === end
                         ? `${value.slice(0, start)}[链接描述文字](url)${value.slice(end)}`
@@ -110,13 +110,13 @@ export default function NavBar(props: PropsType) {
         let selectionStart = start === end ? start + 9 : end + 3
         let selectionEnd = start === end ? end + 12 : end + 6
 
-        props.setValue(newValue, selectionStart, selectionEnd)
+        setValue(newValue, selectionStart, selectionEnd)
         setSelectionRange(el, selectionStart, selectionEnd)
     }
 
     // 添加表格
     const addTable = () => {
-        let { value, editElement: { current: el } } = props
+        let { value, editElement: { current: el }, setValue } = props
         let [start, end] = getCursorPosition(el)
         let newValue = start === end
                         ? `${value.slice(0, start)}\n|  |  |\n|---|---|\n|  |  |${value.slice(end)}`
@@ -125,17 +125,23 @@ export default function NavBar(props: PropsType) {
         let selectionStart = start + 3
         let selectionEnd = end + 3
 
-        props.setValue(newValue, selectionStart, selectionEnd)
+        setValue(newValue, selectionStart, selectionEnd)
         setSelectionRange(el, selectionStart, selectionEnd)
     }
 
     // 添加图片
     const addPhoto = () => {
-        let [start, end] = getCursorPosition(props.editElement.current)
+        let { value, editElement: { current: el }, setValue } = props
+        let [start, end] = getCursorPosition(el)
         let newValue = start === end
-                        ? `${props.value.slice(0, start)}\n![图片描述](url)\n${props.value.slice(end)}`
-                        : `${props.value.slice(0, start)}![${props.value.slice(start, end)}](url)${props.value.slice(end)}`
-        // props.setValue(newValue)
+                        ? `${value.slice(0, start)}\n![图片描述](url)\n${value.slice(end)}`
+                        : `${value.slice(0, start)}\n![${value.slice(start, end)}](url)\n${value.slice(end)}`
+        
+        let selectionStart = start === end ? start + 9 : end + 5
+        let selectionEnd = start === end ? end + 12 : end + 8
+        
+        setValue(newValue, selectionStart, selectionEnd)
+        setSelectionRange(el, selectionStart, selectionEnd)
     }
 
     // 选择代码高亮主题
