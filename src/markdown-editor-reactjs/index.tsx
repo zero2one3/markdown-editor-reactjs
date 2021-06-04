@@ -4,7 +4,11 @@ import { MarkdownEditContainer } from './style/style'
 import NavBar from './navbar/index'
 import 'antd/dist/antd.css';
 import './style/global.css'
-import { getCursorPosition, setSelectionRange } from './utils'
+import { 
+    getCursorPosition, setSelectionRange, handleTwoSideSymbol,
+    addTable, addCodeBlock, addLink, addPhoto, addList, addTitle,
+    addQuote, 
+} from './utils'
 import md from './markdown'
 import { PropsType, historyLinkType } from './types'
 
@@ -59,18 +63,75 @@ export default function MarkdownEdit(props: PropsType) {
 
     // 控制键盘的按键
     const handleKeyUp = (event: any) => {
-        let { keyCode, metaKey, ctrlKey } = event
+        console.log(event);
+        
+        let { keyCode, metaKey, ctrlKey, altKey } = event
         let el = editRef.current
         let [start, end] = getCursorPosition(el)
 
         if(metaKey || ctrlKey) {  // 组合按键
-            if(keyCode === 90) {  // ctrl + z 撤销
-                if(!historyLink.pre) return;
-                let { value, selectionStart, selectionEnd } = historyLink.pre
-                setValue(value)
-                historyLink = historyLink.pre
-                setSelectionRange(el, selectionStart, selectionEnd)
-                event.preventDefault()
+            if(altKey) {
+                if(keyCode === 84) {  // ctrl + alt + t 表格
+                    addTable(editRef.current, wrapSetValue, value)
+                    event.preventDefault()
+                } else if(keyCode === 67) {  // ctrl + alt + c 代码块
+                    addCodeBlock(editRef.current, wrapSetValue, value, '')
+                    event.preventDefault()
+                } else if(keyCode === 86) {   // ctrl + alt + v  行内代码
+                    handleTwoSideSymbol(editRef.current, wrapSetValue, value, '`', "行内代码")
+                    event.preventDefault()
+                } else if(keyCode === 76) {  // ctrl + alt + l  图片链接格式
+                    addPhoto(editRef.current, wrapSetValue, value)
+                    event.preventDefault()
+                } else if(keyCode === 85) {   // ctrl + alt + u  无序列表
+                    addList(editRef.current, wrapSetValue, value, '-', '无序列表')
+                    event.preventDefault()
+                }
+            } else {
+                if(keyCode === 90) {  // ctrl + z 撤销
+                    if(!historyLink.pre) return;
+                    let { value, selectionStart, selectionEnd } = historyLink.pre
+                    setValue(value)
+                    historyLink = historyLink.pre
+                    setSelectionRange(el, selectionStart, selectionEnd)
+                    event.preventDefault()
+                } else if(keyCode === 66) {   // ctrl + b 加粗
+                    handleTwoSideSymbol(editRef.current, wrapSetValue, value, '**', "加粗字体")
+                    event.preventDefault()
+                } else if(keyCode === 73) {   // ctrl + i 斜体
+                    handleTwoSideSymbol(editRef.current, wrapSetValue, value, '*', "倾斜字体")
+                    event.preventDefault()
+                } else if(keyCode === 85) {  // ctrl + u 删除线
+                    handleTwoSideSymbol(editRef.current, wrapSetValue, value, '~~', "删除文本")
+                    event.preventDefault()
+                } else if(keyCode === 76) {   // ctrl + l 链接
+                    addLink(editRef.current, wrapSetValue, value)
+                    event.preventDefault()
+                } else if(keyCode === 79) {   // ctrl + o  无序列表
+                    addList(editRef.current, wrapSetValue, value, '1.', '有序列表')
+                    event.preventDefault()
+                } else if(keyCode === 81) {   // ctrl + q  引用 （有点问题）
+                    addQuote(editRef.current, wrapSetValue, value)
+                    event.preventDefault()
+                } else if(keyCode === 49) {   // ctrl + 1  一级标题
+                    addTitle(editRef.current, wrapSetValue, value, '#', "一级标题")
+                    event.preventDefault()
+                } else if(keyCode === 50) {   // ctrl + 2  二级标题
+                    addTitle(editRef.current, wrapSetValue, value, '##', "二级标题")
+                    event.preventDefault()
+                } else if(keyCode === 51) {   // ctrl + 3  三级标题
+                    addTitle(editRef.current, wrapSetValue, value, '###', "三级标题")
+                    event.preventDefault()
+                } else if(keyCode === 52) {   // ctrl + 4  四级标题
+                    addTitle(editRef.current, wrapSetValue, value, '####', "四级标题")
+                    event.preventDefault()
+                } else if(keyCode === 53) {   // ctrl + 5  五级标题
+                    addTitle(editRef.current, wrapSetValue, value, '#####', "五级标题")
+                    event.preventDefault()
+                } else if(keyCode === 54) {   // ctrl + 6  六级标题
+                    addTitle(editRef.current, wrapSetValue, value, '######', "六级标题")
+                    event.preventDefault()
+                }
             }
         } else {   // 单个按键
             if(keyCode === 9) {  // Tab缩进

@@ -1,7 +1,10 @@
 import React, { useCallback, useState, useEffect } from 'react'
 import { NavBarContainer } from './style'
 import { Tooltip, Dropdown, Menu, message } from 'antd'
-import { hash, getCursorPosition, setSelectionRange } from '../utils'
+import { 
+    hash, handleTwoSideSymbol, addList, addCodeBlock,
+    addLink, addTable, addPhoto
+} from '../utils'
 import { 
     BoldOutlined, ItalicOutlined, StrikethroughOutlined, OrderedListOutlined,
     UnorderedListOutlined, CarryOutOutlined, LinkOutlined, TableOutlined,
@@ -25,57 +28,9 @@ export default function NavBar(props: PropsType) {
     const [codeHighLightTheme, setCodeHighLightTheme] = useState('railscasts')  // 当前代码高亮的主题
     const [markdownTheme, setMarkdownTheme] = useState('maize')  // 当前markdown的主题
 
-    // 控制两边加符号的语法，例如：**粗体**、*斜体*、~~删除文本~~ 等等
-    const handleTwoSideSymbol = useCallback((value, symbol, txt) => {
-        let { editElement: { current: el }, setValue } = props
-        let [start, end] = getCursorPosition(el)
-
-        let newValue = start === end
-                        ? value.slice(0, start) + `${symbol}${txt}${symbol}` + value.slice(end)
-                        : value.slice(0, start) + symbol + value.slice(start, end) + symbol + value.slice(end)
-        
-        let selectionStart = start + symbol.length
-        let selectionEnd = start === end ? end + symbol.length + txt.length : end + symbol.length
-
-        setValue(newValue, selectionStart, selectionEnd)
-        setSelectionRange(el, selectionStart, selectionEnd)  // 选中加粗的文本
-    }, [])
-
-    // 添加列表语法，例如：- 无序列表、1. 有序列表、- [x] 任务列表 等等
-    const addList = useCallback((value, symbol, txt) => {
-        let { editElement: { current: el }, setValue } = props
-        let [start, end] = getCursorPosition(el)
-
-        let newValue = start === end
-                        ? `${value.slice(0, start)}\n${symbol} ${txt}\n${value.slice(end)}`
-                        : `${value.slice(0, start)}\n${symbol} ${value.slice(start, end)}\n${value.slice(end)}`
-
-        let selectionStart = start + 2 + symbol.length
-        let selectionEnd = start === end ? end + 2 + symbol.length + txt.length : end + 2 + symbol.length
-
-        setValue(newValue, selectionStart, selectionEnd)
-        setSelectionRange(el, selectionStart, selectionEnd)
-    }, [])
-
-    // 添加代码块
-    const addCodeBlock = ({ key }: { key: string }) => {
-        let { value, editElement: { current: el }, setValue } = props
-        let [start, end] = getCursorPosition(el)
-
-        let newValue = start === end
-                        ? `${value.slice(0, start)}\n\`\`\`${key}\n\n\`\`\`\n${value.slice(end)}`
-                        : `${value.slice(0, start)}\n\`\`\`${key}\n${value.slice(start, end)}\n\`\`\`\n${value.slice(end)}`
-        
-        let selectionStart = end + 5 + key.length
-        let selectionEnd = end + 5 + key.length
-
-        setValue(newValue, selectionStart, selectionEnd)
-        setSelectionRange(el, selectionStart, selectionEnd)
-    }
-
     // 代码块的列表元素
     const codeBlockMenu = (
-        <Menu onClick={addCodeBlock}>
+        <Menu onClick={({ key }) => addCodeBlock(props.editElement.current, props.setValue, props.value, key)}>
             <ItemGroup title="代码块语言" className="item-group-list-container">
                 <Item key="js">JavaScript</Item>
                 <Item key="ts">TypeScript</Item>
@@ -98,51 +53,6 @@ export default function NavBar(props: PropsType) {
             </ItemGroup>
         </Menu>
     )
-
-    // 添加链接
-    const addLink = () => {
-        let { value, editElement: { current: el }, setValue } = props
-        let [start, end] = getCursorPosition(el)
-        let newValue = start === end
-                        ? `${value.slice(0, start)}[链接描述文字](url)${value.slice(end)}`
-                        : `${value.slice(0, start)}[${value.slice(start, end)}](url)${value.slice(end)}`
-
-        let selectionStart = start === end ? start + 9 : end + 3
-        let selectionEnd = start === end ? end + 12 : end + 6
-
-        setValue(newValue, selectionStart, selectionEnd)
-        setSelectionRange(el, selectionStart, selectionEnd)
-    }
-
-    // 添加表格
-    const addTable = () => {
-        let { value, editElement: { current: el }, setValue } = props
-        let [start, end] = getCursorPosition(el)
-        let newValue = start === end
-                        ? `${value.slice(0, start)}\n|  |  |\n|---|---|\n|  |  |${value.slice(end)}`
-                        : `${value.slice(0, start)}\n| ${value.slice(start, end)} |  |\n|---|---|\n|  |  |${value.slice(end)}`
-
-        let selectionStart = start + 3
-        let selectionEnd = end + 3
-
-        setValue(newValue, selectionStart, selectionEnd)
-        setSelectionRange(el, selectionStart, selectionEnd)
-    }
-
-    // 添加图片
-    const addPhoto = () => {
-        let { value, editElement: { current: el }, setValue } = props
-        let [start, end] = getCursorPosition(el)
-        let newValue = start === end
-                        ? `${value.slice(0, start)}\n![图片描述](url)\n${value.slice(end)}`
-                        : `${value.slice(0, start)}\n![${value.slice(start, end)}](url)\n${value.slice(end)}`
-        
-        let selectionStart = start === end ? start + 9 : end + 5
-        let selectionEnd = start === end ? end + 12 : end + 8
-        
-        setValue(newValue, selectionStart, selectionEnd)
-        setSelectionRange(el, selectionStart, selectionEnd)
-    }
 
     // 选择代码高亮主题
     const selectCodeHighLightTheme = useCallback(({ key }) => {  
@@ -290,22 +200,22 @@ export default function NavBar(props: PropsType) {
     return (
         <NavBarContainer>
             <Tooltip title='加粗' arrowPointAtCenter>
-                <BoldOutlined className="item" onClick={() => handleTwoSideSymbol(props.value, '**', '加粗字体')}/>
+                <BoldOutlined className="item" onClick={() => handleTwoSideSymbol(props.editElement.current, props.setValue, props.value, '**', '加粗字体')}/>
             </Tooltip>
             <Tooltip title='斜体' arrowPointAtCenter>
-                <ItalicOutlined className="item" onClick={() => handleTwoSideSymbol(props.value, '*', '倾斜字体')}/>
+                <ItalicOutlined className="item" onClick={() => handleTwoSideSymbol(props.editElement.current, props.setValue, props.value, '*', '倾斜字体')}/>
             </Tooltip>
             <Tooltip title='删除线' arrowPointAtCenter>
-                <StrikethroughOutlined className="item" onClick={() => handleTwoSideSymbol(props.value, '~~', '删除文本')}/>
+                <StrikethroughOutlined className="item" onClick={() => handleTwoSideSymbol(props.editElement.current, props.setValue, props.value, '~~', '删除文本')}/>
             </Tooltip>
             <Tooltip title='有序列表' arrowPointAtCenter>
-                <OrderedListOutlined className="item" onClick={() => addList(props.value, '1.', '有序列表')}/>
+                <OrderedListOutlined className="item" onClick={() => addList(props.editElement.current, props.setValue, props.value, '1.', '有序列表')}/>
             </Tooltip>
             <Tooltip title='无序列表' arrowPointAtCenter>
-                <UnorderedListOutlined className="item" onClick={() => addList(props.value, '-', '无序列表')}/>
+                <UnorderedListOutlined className="item" onClick={() => addList(props.editElement.current, props.setValue, props.value, '-', '无序列表')}/>
             </Tooltip>
             <Tooltip title='任务列表' arrowPointAtCenter>
-                <CarryOutOutlined className="item" onClick={() => addList(props.value, '- [x]', '任务列表')}/>
+                <CarryOutOutlined className="item" onClick={() => addList(props.editElement.current, props.setValue, props.value, '- [x]', '任务列表')}/>
             </Tooltip>
             <Dropdown 
                 overlay={codeBlockMenu} 
@@ -317,13 +227,13 @@ export default function NavBar(props: PropsType) {
                 </span>
             </Dropdown>
             <Tooltip title='超链接' arrowPointAtCenter>
-                <LinkOutlined className="item" onClick={addLink}/>
+                <LinkOutlined className="item" onClick={() => addLink(props.editElement.current, props.setValue, props.value)}/>
             </Tooltip>
             <Tooltip title='表格' arrowPointAtCenter>
-                <TableOutlined className="item" onClick={addTable}/>
+                <TableOutlined className="item" onClick={() => addTable(props.editElement.current, props.setValue, props.value)}/>
             </Tooltip>
             <Tooltip title='图片' arrowPointAtCenter>
-                <PictureOutlined className="item" onClick={addPhoto}/>
+                <PictureOutlined className="item" onClick={() => addPhoto(props.editElement.current, props.setValue, props.value)}/>
             </Tooltip> 
             <Dropdown 
                 overlay={markdownThemeMenu} 

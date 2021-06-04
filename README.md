@@ -1,15 +1,15 @@
 # 基于React的markdown编辑器组件
 
-该组件当前还未完全开发完成，若有`bug`或好的建议，欢迎加我微信：`Lpyexplore333`或者在[github](https://github.com/zero2one3/markdown-editor-reactjs)上提pr
+若有`bug`或好的建议，欢迎加我微信：`Lpyexplore333`或者在[github](https://github.com/zero2one3/markdown-editor-reactjs)上提pr
 
 ## 安装
 
 ```shell
 # npm
-npm i markdown-editor-reactjs
+npm i markdown-editor-reactjs --save
 
 # yarn
-yarn add markdown-editor-reactjs
+yarn add markdown-editor-reactjs -D
 ```
 
 ## 例子
@@ -28,11 +28,15 @@ function App() {
 }
 ```
 
-## 功能
 
-功能还未全部完善，但会努力一点点补上
+## 快捷键
 
-### 代码高亮主题
+| windows | mac | 功能 |
+| --- | --- | --- |
+| ctrl + z | command + z | 返回上一步 |
+| tab | tab | 缩进4个字符 |
+
+## 代码高亮主题
 
 目前支持的代码高亮主题有：
 - github
@@ -49,13 +53,13 @@ function App() {
 - zenburn
 - agate
 
-### markdown主题
+## markdown主题
 
 目前支持的markdown主题有：
 - github
 - maize（Default）
 
-### 其它功能
+## 其它功能
 
 1. 支持一键**导出**/**导入** `md`格式的文件
 2. ...正在努力开发中
