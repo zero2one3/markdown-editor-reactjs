@@ -33,8 +33,25 @@ function App() {
 
 | windows | mac | 功能 |
 | --- | --- | --- |
-| ctrl + z | command + z | 返回上一步 |
 | tab | tab | 缩进4个字符 |
+| ctrl + z | command + z | 返回上一步 |
+| ctrl + b | command + b | 加粗 |
+| ctrl + i | command + i | 斜体 |
+| ctrl + u | command + u | 删除线 |
+| ctrl + l | command + l | 链接 |
+| ctrl + o | command + o | 有序列表 |
+| ctrl + q | command + q | 引用（暂时有兼容性问题，待处理中） |
+| ctrl + 1 | command + 1 | 一级标题 |
+| ctrl + 2 | command + 2 | 二级标题 |
+| ctrl + 3 | command + 3 | 三级标题 |
+| ctrl + 4 | command + 4 | 四级标题 |
+| ctrl + 5 | command + 5 | 五级标题 |
+| ctrl + 6 | command + 6 | 六级标题 |
+| ctrl + alt + t | command + option + t | 表格 |
+| ctrl + alt + c | command + option + c | 代码块 |
+| ctrl + alt + v | command + option + v | 行内代码 |
+| ctrl + alt + l | command + option + l | 图片链接格式 |
+| ctrl + alt + u | command + option + u | 无序列表 |
 
 ## 代码高亮主题
 
