@@ -14,7 +14,7 @@ const { Item, ItemGroup } = Menu
 
 interface PropsType {
     value: string;
-    setValue: (value: string) => void;
+    setValue: (value: string, selectionStart: number, selectionEnd: number) => void;
     editElement: any;
     fullScreen: boolean;
     setFullScreen: (fullScreen: boolean) => void;
@@ -37,7 +37,7 @@ export default function NavBar(props: PropsType) {
         let selectionStart = start + symbol.length
         let selectionEnd = start === end ? end + symbol.length + txt.length : end + symbol.length
 
-        props.setValue(newValue)
+        props.setValue(newValue, selectionStart, selectionEnd)
         setSelectionRange(el, selectionStart, selectionEnd)  // 选中加粗的文本
     }, [])
 
@@ -53,7 +53,7 @@ export default function NavBar(props: PropsType) {
         let selectionStart = start + 2 + symbol.length
         let selectionEnd = start === end ? end + 2 + symbol.length + txt.length : end + 2 + symbol.length
 
-        props.setValue(newValue)
+        props.setValue(newValue, selectionStart, selectionEnd)
         setSelectionRange(el, selectionStart, selectionEnd)
     }, [])
 
@@ -69,7 +69,7 @@ export default function NavBar(props: PropsType) {
         let selectionStart = end + 5 + key.length
         let selectionEnd = end + 5 + key.length
 
-        props.setValue(newValue)
+        props.setValue(newValue, selectionStart, selectionEnd)
         setSelectionRange(el, selectionStart, selectionEnd)
     }
 
@@ -110,18 +110,23 @@ export default function NavBar(props: PropsType) {
         let selectionStart = start === end ? start + 9 : end + 3
         let selectionEnd = start === end ? end + 12 : end + 6
 
-        props.setValue(newValue)
+        props.setValue(newValue, selectionStart, selectionEnd)
         setSelectionRange(el, selectionStart, selectionEnd)
     }
 
     // 添加表格
     const addTable = () => {
-        let [start, end] = getCursorPosition(props.editElement.current)
+        let { value, editElement: { current: el } } = props
+        let [start, end] = getCursorPosition(el)
         let newValue = start === end
-                        ? `${props.value.slice(0, start)}\n| | |\n|--|--|\n| | |${props.value.slice(end)}`
-                        : `${props.value.slice(0, start)}\n|${props.value.slice(start, end)}| |\n|--|--|\n| | |${props.value.slice(end)}`
+                        ? `${value.slice(0, start)}\n|  |  |\n|---|---|\n|  |  |${value.slice(end)}`
+                        : `${value.slice(0, start)}\n| ${value.slice(start, end)} |  |\n|---|---|\n|  |  |${value.slice(end)}`
 
-        props.setValue(newValue)
+        let selectionStart = start + 3
+        let selectionEnd = end + 3
+
+        props.setValue(newValue, selectionStart, selectionEnd)
+        setSelectionRange(el, selectionStart, selectionEnd)
     }
 
     // 添加图片
@@ -130,7 +135,7 @@ export default function NavBar(props: PropsType) {
         let newValue = start === end
                         ? `${props.value.slice(0, start)}\n![图片描述](url)\n${props.value.slice(end)}`
                         : `${props.value.slice(0, start)}![${props.value.slice(start, end)}](url)${props.value.slice(end)}`
-        props.setValue(newValue)
+        // props.setValue(newValue)
     }
 
     // 选择代码高亮主题
@@ -215,7 +220,7 @@ export default function NavBar(props: PropsType) {
             let reader = new FileReader()
             reader.readAsText(files[0])
             reader.onload = () => {
-                props.setValue(reader.result as string)
+                props.setValue(reader.result as string, 0, 0)
                 message.success('导入成功')
             }
         })

@@ -12,7 +12,7 @@ let scrolling: 0 | 1 | 2 = 0   // 当前滚动块。0: both none ; 1: edit ; 2: 
 let scrollTimer: any;  // 改变scrolling值得定时器
 let historyTimer: any;  // 记录历史输入内容的定时器
 let mkRenderTimer: any;  // markdown渲染的定时器
-let historyLink: historyLinkType = { value: '', pre: null, next: null }   // 存储表单历史输入内容的双向链表
+let historyLink: historyLinkType = { value: '', pre: null, next: null, selectionStart: 0, selectionEnd: 0 }   // 存储表单历史输入内容的双向链表
 
 export default function MarkdownEdit(props: PropsType) {
     const editRef = useRef<any>(null)
@@ -62,8 +62,18 @@ export default function MarkdownEdit(props: PropsType) {
         let { keyCode, metaKey, ctrlKey } = event
         let el = editRef.current
         let [start, end] = getCursorPosition(el)
-        switch(keyCode) {
-            case 9:   // Tab缩进
+
+        if(metaKey || ctrlKey) {  // 组合按键
+            if(keyCode === 90) {  // ctrl + z 撤销
+                if(!historyLink.pre) return;
+                let { value, selectionStart, selectionEnd } = historyLink.pre
+                setValue(value)
+                historyLink = historyLink.pre
+                setSelectionRange(el, selectionStart, selectionEnd)
+                event.preventDefault()
+            }
+        } else {   // 单个按键
+            if(keyCode === 0) {  // Tab缩进
                 let newValue = value.slice(0, start) + '    ' + value.slice(start)
 
                 let selectionStart = start + 4
@@ -72,19 +82,22 @@ export default function MarkdownEdit(props: PropsType) {
                 setValue(newValue)
                 setSelectionRange(el, selectionStart, selectionEnd)
                 event.preventDefault()
-                break;
-            case 90: // ctrl + z 撤销
-                if((!metaKey && !ctrlKey) || !historyLink.pre) break;
-                setValue(historyLink.value)
-                historyLink = historyLink.pre
-                event.preventDefault()
-                break;
+            }
         }
     }
 
     // 包装过后的setValue
-    const wrapSetValue = useCallback((event) => {
-        let value = typeof event === 'string' ? event : event.target.value
+    const wrapSetValue = useCallback((event, start?: number, end?: number) => {
+        let value = event;
+        let selectionStart = start as number
+        let selectionEnd = end as number
+        if(typeof event !== 'string') {
+            value = event.target.value
+            let [start, end] = getCursorPosition(event.target)
+            selectionStart = start
+            selectionEnd = end 
+        }
+        
         setValue(value)
 
         if(historyTimer) clearTimeout(historyTimer);
@@ -92,7 +105,9 @@ export default function MarkdownEdit(props: PropsType) {
             historyLink.next = {
                 value,
                 pre: historyLink,
-                next: null
+                next: null,
+                selectionStart,
+                selectionEnd
             }
             historyLink = historyLink.next
             clearTimeout(historyTimer)
@@ -105,12 +120,17 @@ export default function MarkdownEdit(props: PropsType) {
         mkRenderTimer = setTimeout(() => setHtmlString(md.render(value)), 200)      
     }, [value])
 
+    useEffect(() => {
+        // 设置历史记录的初始状态
+        historyLink.value = props.initValue ? props.initValue : ''
+    }, [])
+
     return (
         <MarkdownEditContainer>
             <NavBar
                 value={value}
                 editElement={editRef}
-                setValue={setValue}
+                setValue={wrapSetValue}
                 fullScreen={fullScreen}
                 setFullScreen={setFullScreen}
                 setLoading={setLoading}

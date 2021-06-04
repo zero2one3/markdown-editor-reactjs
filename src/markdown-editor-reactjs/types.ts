@@ -6,4 +6,6 @@ export interface historyLinkType {
     value: string;
     pre: null | historyLinkType;
     next: null | historyLinkType;
+    selectionStart: number;
+    selectionEnd: number;
 }
