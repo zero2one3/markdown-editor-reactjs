@@ -35,6 +35,7 @@ function App() {
 | --- | --- | --- |
 | tab | tab | 缩进4个字符 |
 | ctrl + z | command + z | 返回上一步 |
+| ctrl + y | command + y | 返回下一步 |
 | ctrl + b | command + b | 加粗 |
 | ctrl + i | command + i | 斜体 |
 | ctrl + u | command + u | 删除线 |
