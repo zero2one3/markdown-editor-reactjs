@@ -63,7 +63,7 @@ export default function MarkdownEdit(props: PropsType) {
 
     // 控制键盘的按键
     const handleKeyUp = (event: any) => {
-        console.log(event);
+        // console.log(event);
         
         let { keyCode, metaKey, ctrlKey, altKey } = event
         let el = editRef.current
