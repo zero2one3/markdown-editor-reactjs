@@ -4,12 +4,15 @@ import { MarkdownEditContainer } from './style/style'
 import NavBar from './navbar/index'
 import 'antd/dist/antd.css';
 import './style/global.css'
-import { getCursorPosition } from './utils'
+import { getCursorPosition, setSelectionRange } from './utils'
 import md from './markdown'
-import { PropsType } from './types'
+import { PropsType, historyLinkType } from './types'
 
 let scrolling: 0 | 1 | 2 = 0   // 当前滚动块。0: both none ; 1: edit ; 2: show
 let scrollTimer: any;  // 改变scrolling值得定时器
+let historyTimer: any;  // 记录历史输入内容的定时器
+let mkRenderTimer: any;  // markdown渲染的定时器
+let historyLink: historyLinkType = { value: '', pre: null, next: null }   // 存储表单历史输入内容的双向链表
 
 export default function MarkdownEdit(props: PropsType) {
     const editRef = useRef<any>(null)
@@ -55,22 +58,51 @@ export default function MarkdownEdit(props: PropsType) {
     }, [])
 
     // 控制键盘的按键
-    // const handleKeyDown = (event: any) => {
-    //     console.log(event);
-    //     let { keyCode } = event
-    //     let [start, end] = getCursorPosition(editRef.current)
-    //     switch(keyCode) {
-    //         case 9:   // Tab缩进
-    //             let newValue = value.slice(0, start) + '    ' + value.slice(start)
-    //             editChange('', newValue)
-    //             event.preventDefault()
-    //             break;
-    //     }
-    // }
+    const handleKeyUp = (event: any) => {
+        let { keyCode, metaKey, ctrlKey } = event
+        let el = editRef.current
+        let [start, end] = getCursorPosition(el)
+        switch(keyCode) {
+            case 9:   // Tab缩进
+                let newValue = value.slice(0, start) + '    ' + value.slice(start)
+
+                let selectionStart = start + 4
+                let selectionEnd = end + 4
+
+                setValue(newValue)
+                setSelectionRange(el, selectionStart, selectionEnd)
+                event.preventDefault()
+                break;
+            case 90: // ctrl + z 撤销
+                if((!metaKey && !ctrlKey) || !historyLink.pre) break;
+                setValue(historyLink.value)
+                historyLink = historyLink.pre
+                event.preventDefault()
+                break;
+        }
+    }
+
+    // 包装过后的setValue
+    const wrapSetValue = useCallback((event) => {
+        let value = typeof event === 'string' ? event : event.target.value
+        setValue(value)
+
+        if(historyTimer) clearTimeout(historyTimer);
+        historyTimer = setTimeout(() => {
+            historyLink.next = {
+                value,
+                pre: historyLink,
+                next: null
+            }
+            historyLink = historyLink.next
+            clearTimeout(historyTimer)
+        }, 1000)
+    }, [])
 
     // value改变，驱动htmlString的改变
     useEffect(() => {
-        setHtmlString(md.render(value))
+        if(mkRenderTimer) clearTimeout(mkRenderTimer);
+        mkRenderTimer = setTimeout(() => setHtmlString(md.render(value)), 200)      
     }, [value])
 
     return (
@@ -93,9 +125,9 @@ export default function MarkdownEdit(props: PropsType) {
                         id="markdown-editor-reactjs-edit"
                         className={`${fullScreen ? 'hide' : ''}`} 
                         ref={editRef}
-                        onChange={(e) => setValue(e.target.value)}
+                        onChange={wrapSetValue}
                         onScroll={handleScroll}
-                        // onKeyDown={handleKeyDown}
+                        onKeyDown={handleKeyUp}
                         value={value}
                     />
                     <div 
