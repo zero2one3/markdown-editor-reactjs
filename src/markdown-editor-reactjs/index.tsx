@@ -11,6 +11,7 @@ import {
 } from './utils'
 import md from './markdown'
 import { PropsType, historyLinkType } from './types'
+import { log } from 'console';
 
 let scrolling: 0 | 1 | 2 = 0   // 当前滚动块。0: both none ; 1: edit ; 2: show
 let scrollTimer: any;  // 改变scrolling值得定时器
@@ -63,13 +64,12 @@ export default function MarkdownEdit(props: PropsType) {
 
     // 控制键盘的按键
     const handleKeyUp = (event: any) => {
-        // console.log(event);
-        
-        let { keyCode, metaKey, ctrlKey, altKey } = event
+        console.log(event);
+        let { keyCode, metaKey, ctrlKey, altKey, shiftKey } = event
         let el = editRef.current
         let [start, end] = getCursorPosition(el)
 
-        if(metaKey || ctrlKey) {  // 组合按键
+        if(metaKey || ctrlKey) {  // ctrl 开头的组合按键
             if(altKey) {
                 if(keyCode === 84) {  // ctrl + alt + t 表格
                     addTable(editRef.current, wrapSetValue, value)
@@ -89,10 +89,17 @@ export default function MarkdownEdit(props: PropsType) {
                 }
             } else {
                 if(keyCode === 90) {  // ctrl + z 撤销
-                    if(!historyLink.pre) return;
+                    if(!historyLink.pre) return event.preventDefault();
                     let { value, selectionStart, selectionEnd } = historyLink.pre
                     setValue(value)
                     historyLink = historyLink.pre
+                    setSelectionRange(el, selectionStart, selectionEnd)
+                    event.preventDefault()
+                } else if(keyCode === 89) {  // ctrl + Y 前进
+                    if(!historyLink.next) return event.preventDefault();
+                    let { value, selectionStart, selectionEnd } = historyLink.next
+                    setValue(value)
+                    historyLink = historyLink.next
                     setSelectionRange(el, selectionStart, selectionEnd)
                     event.preventDefault()
                 } else if(keyCode === 66) {   // ctrl + b 加粗
@@ -132,6 +139,49 @@ export default function MarkdownEdit(props: PropsType) {
                     addTitle(editRef.current, wrapSetValue, value, '######', "六级标题")
                     event.preventDefault()
                 }
+            }
+        } else if(shiftKey) {   // shift 开头的组合按键
+            if(keyCode === 9) {   // shift + tab 取消缩进
+                let paragraph = value.split('\n'),
+                    stringCount = 0,
+                    selectionStart = start, 
+                    selectionEnd = end,
+                    len = paragraph.length,
+                    cancelSpaceCount = 0
+                
+                for(let i = 0; i < len; i++) {
+                    let item = paragraph[i]
+                    let nextStringCount = stringCount + item.length + 1
+                    
+                    // 判断选中的段落的前缀是否有4个空格并去除空格进行缩进
+                    if(nextStringCount > start && stringCount < end) {
+                        let spaces = item.split('    ')  // 判断有多少4个空格
+                        // 去前缀空格
+                        if(spaces.length !== 1) {
+                            spaces.shift();
+                            cancelSpaceCount += 4
+                        }
+                        else {
+                            cancelSpaceCount += spaces[0].length
+                            spaces[0] = spaces[0].trimLeft();
+                            cancelSpaceCount -= spaces[0].length
+                        }
+
+                        let newParagraph = spaces.join('    ')
+                        paragraph[i] = newParagraph
+                        // 获取取消缩进后的光标开始位置和结束位置
+                        if(start > stringCount) selectionStart -= item.length - newParagraph.length;
+                        if(end < nextStringCount) selectionEnd -= cancelSpaceCount         
+                    } else if(stringCount > end) break;            
+
+                    stringCount = nextStringCount
+                }
+
+                let newValue = paragraph.join('\n')
+
+                wrapSetValue(newValue, selectionStart, selectionEnd)
+                setSelectionRange(el, selectionStart, selectionEnd)
+                event.preventDefault()
             }
         } else {   // 单个按键
             if(keyCode === 9) {  // Tab缩进
@@ -178,7 +228,7 @@ export default function MarkdownEdit(props: PropsType) {
     // value改变，驱动htmlString的改变
     useEffect(() => {
         if(mkRenderTimer) clearTimeout(mkRenderTimer);
-        mkRenderTimer = setTimeout(() => setHtmlString(md.render(value)), 200)      
+        mkRenderTimer = setTimeout(() => setHtmlString(md.render(value)), 200)         
     }, [value])
 
     useEffect(() => {
