@@ -33,7 +33,8 @@ function App() {
 
 | windows | mac | 功能 |
 | --- | --- | --- |
-| tab | tab | 缩进4个字符 |
+| tab | tab | 缩进4个字符（支持多行） |
+| shift + tab | shift + tab | 删除缩进的4个字符（支持多行） |
 | ctrl + z | command + z | 返回上一步 |
 | ctrl + y | command + y | 返回下一步 |
 | ctrl + b | command + b | 加粗 |
