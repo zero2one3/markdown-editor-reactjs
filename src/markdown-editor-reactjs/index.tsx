@@ -185,10 +185,31 @@ export default function MarkdownEdit(props: PropsType) {
             }
         } else {   // 单个按键
             if(keyCode === 9) {  // Tab缩进
-                let newValue = value.slice(0, start) + '    ' + value.slice(start)
+                let paragraph = value.split('\n'),
+                    stringCount = 0,
+                    selectionStart = start, 
+                    selectionEnd = end,
+                    len = paragraph.length,
+                    addlSpaceCount = 0
+                
+                for(let i = 0; i < len; i++) {
+                    let item = paragraph[i]
+                    let nextStringCount = stringCount + item.length + 1
+                    
+                    // 将选中的每段段落前面加4个空格
+                    if(nextStringCount > start && stringCount < end) {
+                        let newParagraph = '    ' + item
+                        addlSpaceCount += 4
+                        paragraph[i] = newParagraph
+                        // 获取取消缩进后的光标开始位置和结束位置
+                        if(start > stringCount) selectionStart += 4;
+                        if(end < nextStringCount) selectionEnd += addlSpaceCount         
+                    } else if(stringCount > end) break;            
 
-                let selectionStart = start + 4
-                let selectionEnd = end + 4
+                    stringCount = nextStringCount
+                }
+
+                let newValue = paragraph.join('\n')
 
                 wrapSetValue(newValue, selectionStart, selectionEnd)
                 setSelectionRange(el, selectionStart, selectionEnd)
