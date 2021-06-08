@@ -64,7 +64,6 @@ export default function MarkdownEdit(props: PropsType) {
 
     // 控制键盘的按键
     const handleKeyUp = (event: any) => {
-        console.log(event);
         let { keyCode, metaKey, ctrlKey, altKey, shiftKey } = event
         let el = editRef.current
         let [start, end] = getCursorPosition(el)
@@ -190,27 +189,40 @@ export default function MarkdownEdit(props: PropsType) {
                     selectionStart = start, 
                     selectionEnd = end,
                     len = paragraph.length,
-                    addlSpaceCount = 0
+                    addlSpaceCount = 0,
+                    newValue = ''
                 
-                for(let i = 0; i < len; i++) {
-                    let item = paragraph[i]
-                    let nextStringCount = stringCount + item.length + 1
+                // 光标未选中文字
+                if(start === end) {
+                    console.log(start, end);
                     
-                    // 将选中的每段段落前面加4个空格
-                    if(nextStringCount > start && stringCount < end) {
-                        let newParagraph = '    ' + item
-                        addlSpaceCount += 4
-                        paragraph[i] = newParagraph
-                        // 获取取消缩进后的光标开始位置和结束位置
-                        if(start > stringCount) selectionStart += 4;
-                        if(end < nextStringCount) selectionEnd += addlSpaceCount         
-                    } else if(stringCount > end) break;            
-
-                    stringCount = nextStringCount
+                    newValue = value.slice(0, start) + '    ' + value.slice(end);
+                    selectionStart += 4
+                    selectionEnd += 4
+                    console.log(selectionStart, selectionEnd);
+                    console.log(newValue);
+                    
+                    
+                } else {   //  光标选中了文字
+                    for(let i = 0; i < len; i++) {
+                        let item = paragraph[i]
+                        let nextStringCount = stringCount + item.length + 1
+                        
+                        // 将选中的每段段落前面加4个空格
+                        if(nextStringCount > start && stringCount < end) {
+                            let newParagraph = '    ' + item
+                            addlSpaceCount += 4
+                            paragraph[i] = newParagraph
+                            // 获取取消缩进后的光标开始位置和结束位置
+                            if(start > stringCount) selectionStart += 4;
+                            if(end < nextStringCount) selectionEnd += addlSpaceCount         
+                        } else if(stringCount > end) break;            
+    
+                        stringCount = nextStringCount
+                    }
+                    newValue = paragraph.join('\n')
                 }
-
-                let newValue = paragraph.join('\n')
-
+                
                 wrapSetValue(newValue, selectionStart, selectionEnd)
                 setSelectionRange(el, selectionStart, selectionEnd)
                 event.preventDefault()
