@@ -1,5 +1,6 @@
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
+const MarkdownItTaskCheckbox = require('markdown-it-task-checkbox')
 
 const md: any = new MarkdownIt({
     breaks: true,   // 自动换行
@@ -15,7 +16,7 @@ const md: any = new MarkdownIt({
         return '<pre class="hljs"><code>' + md.utils.escapeHtml(code) + '</code></pre>';
     }
 })
-.use(require('markdown-it-task-checkbox'),{
+.use(MarkdownItTaskCheckbox ,{
     disabled: true,
     divWrap: false,
     divClass: 'checkbox',

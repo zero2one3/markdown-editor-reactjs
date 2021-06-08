@@ -3,6 +3,11 @@ import commonjs from 'rollup-plugin-commonjs'  // 解决rollup无法识别common
 import postcss from 'rollup-plugin-postcss'  // postcss处理css文件
 import nodePolyfills from 'rollup-plugin-node-polyfills';
 import typescript from 'rollup-plugin-typescript2'
+import resolve from 'rollup-plugin-node-resolve';
+import json from '@rollup/plugin-json'
+import terser from 'rollup-plugin-terser'
+
+const env = process.env.NODE_ENV;
 
 export default {
     input: './src/index.js',
@@ -13,15 +18,28 @@ export default {
     plugins: [
         babel({
             exclude: "node_modules/**",
+            plugins: [
+                "@babel/plugin-external-helpers"
+            ]
         }),
-        commonjs(),
+        commonjs({
+            include: "node_modules/**"
+        }),
         postcss({
             plugins: [
                 require('autoprefixer')({ overrideBrowserslist: ['> 0.15% in CN'] })
             ]
         }),
         typescript(),
-        nodePolyfills()
+        nodePolyfills(),
+        resolve({
+            extensions: ['.js', '.jsx', '.ts', '.tsx']
+        }),
+        json(),
+        env === 'production' && terser(),  // 生产环境打包时压缩代码
     ],
-    external: ['react']
+    external: ['react', '@ant-design/icons', 'antd', 'styled-components', 'react-dom'],
+    onwarn: function (warning) {
+        if(warning.code === 'THIS_IS_UNDEFINED') return;
+    }
 }
