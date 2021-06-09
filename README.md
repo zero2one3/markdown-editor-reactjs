@@ -82,3 +82,9 @@ function App() {
 
 1. 支持一键**导出**/**导入** `md`格式的文件
 2. ...正在努力开发中
+
+## License
+
+[MIT](https://opensource.org/licenses/MIT)
+
+Copyright (c) 2021-present, zero2one
