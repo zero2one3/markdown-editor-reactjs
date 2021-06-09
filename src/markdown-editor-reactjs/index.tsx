@@ -199,10 +199,6 @@ export default function MarkdownEdit(props: PropsType) {
                     newValue = value.slice(0, start) + '    ' + value.slice(end);
                     selectionStart += 4
                     selectionEnd += 4
-                    console.log(selectionStart, selectionEnd);
-                    console.log(newValue);
-                    
-                    
                 } else {   //  光标选中了文字
                     for(let i = 0; i < len; i++) {
                         let item = paragraph[i]
