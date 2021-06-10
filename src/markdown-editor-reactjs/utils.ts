@@ -1,3 +1,5 @@
+import { historyLinkType } from './types'
+
 // 生成哈希串
 export function hash(len: number = 10) {
     let numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
@@ -34,6 +36,19 @@ export function setSelectionRange(el: HTMLTextAreaElement, selectionStart: numbe
         el.setSelectionRange(selectionStart, selectionEnd)   // 光标选中指定的文本
         clearTimeout(timer)
     }, 0)
+}
+
+// 通过当前元素的光标位置记录光标的历史位置
+export function recordCursorHistoryByElement (historyLink: historyLinkType, el: HTMLTextAreaElement) {
+    let [selectionStart, selectionEnd] = getCursorPosition(el)
+    historyLink.selectionStart = selectionStart
+    historyLink.selectionEnd = selectionEnd
+}
+
+// 通过指定的光标位置记录光标的历史位置
+export function recordCursorHistoryByPosition (historyLink: historyLinkType, selectionStart: number, selectionEnd: number) {
+    historyLink.selectionStart = selectionStart
+    historyLink.selectionEnd = selectionEnd
 }
 
 // 控制两边加符号的语法，例如：**粗体**、*斜体*、~~删除文本~~ 等等

@@ -8,7 +8,7 @@ import './style/global.css'
 import { 
     getCursorPosition, setSelectionRange, handleTwoSideSymbol,
     addTable, addCodeBlock, addLink, addPhoto, addList, addTitle,
-    addQuote, 
+    addQuote, recordCursorHistoryByElement, recordCursorHistoryByPosition,
 } from './utils'
 import md from './markdown'
 import { PropsType, historyLinkType } from './types'
@@ -195,8 +195,6 @@ const MarkdownEdit : React.FC<PropsType> = ({ initValue, indentation }) => {
                 
                 // 光标未选中文字
                 if(start === end) {
-                    console.log(start, end);
-                    
                     newValue = value.slice(0, start) + ' '.repeat(_indentation) + value.slice(end);
                     selectionStart += _indentation
                     selectionEnd += _indentation
@@ -227,7 +225,7 @@ const MarkdownEdit : React.FC<PropsType> = ({ initValue, indentation }) => {
         }
     }
 
-    // 包装过后的setValue
+    // 包装过后的setValue（能记录历史操作记录）
     const wrapSetValue = useCallback((event, start?: number, end?: number) => {
         let value = event;
         let selectionStart = start as number
@@ -255,6 +253,11 @@ const MarkdownEdit : React.FC<PropsType> = ({ initValue, indentation }) => {
         }, 1000)
     }, [])
 
+    // 编辑区的点击事件
+    const editClick = useCallback((e) => {
+        recordCursorHistoryByElement(historyLink, e.target)
+    }, [])
+
     // value改变，驱动htmlString的改变
     useEffect(() => {
         if(mkRenderTimer) clearTimeout(mkRenderTimer);
@@ -265,10 +268,19 @@ const MarkdownEdit : React.FC<PropsType> = ({ initValue, indentation }) => {
     }, [value])
 
     useEffect(() => {
+        let __initValue = initValue === undefined ? '' : initValue;
+        let __indentation = indentation === undefined ? _indentation : indentation
         // 设置历史记录的初始状态
-        historyLink.value = initValue === undefined ? '' : initValue;
-        changeFunction.initValueChange(initValue === undefined ? _initValue : initValue)
-        changeFunction.indentationChange(indentation === undefined ? _indentation : indentation)
+        historyLink.value = __initValue
+        // 初始化编辑区内容
+        setValue(__initValue)
+        /* 修改配置变量 */
+        changeFunction.initValueChange(__initValue)
+        changeFunction.indentationChange(__indentation)
+        // 初次进入聚焦编辑区
+        let totalLen = __initValue.length
+        setSelectionRange(editRef.current, totalLen, totalLen)
+        recordCursorHistoryByPosition(historyLink, totalLen, totalLen)
     }, [])
 
     return (
@@ -291,6 +303,7 @@ const MarkdownEdit : React.FC<PropsType> = ({ initValue, indentation }) => {
                         id="markdown-editor-reactjs-edit"
                         className={`${fullScreen ? 'hide' : ''}`} 
                         ref={editRef}
+                        onClick={editClick}
                         onChange={wrapSetValue}
                         onScroll={handleScroll}
                         onKeyDown={handleKeyUp}
