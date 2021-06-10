@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { Spin } from 'antd'
 import { MarkdownEditContainer } from './style/style'
 import NavBar from './navbar/index'
+import PropTypes from 'prop-types'
 import 'antd/dist/antd.css';
 import './style/global.css'
 import { 
@@ -11,7 +12,7 @@ import {
 } from './utils'
 import md from './markdown'
 import { PropsType, historyLinkType } from './types'
-import { log } from 'console';
+import changeFunction, { _indentation, _initValue } from './config'
 
 let scrolling: 0 | 1 | 2 = 0   // 当前滚动块。0: both none ; 1: edit ; 2: show
 let scrollTimer: any;  // 改变scrolling值得定时器
@@ -19,10 +20,10 @@ let historyTimer: any;  // 记录历史输入内容的定时器
 let mkRenderTimer: any;  // markdown渲染的定时器
 let historyLink: historyLinkType = { value: '', pre: null, next: null, selectionStart: 0, selectionEnd: 0 }   // 存储表单历史输入内容的双向链表
 
-export default function MarkdownEdit(props: PropsType) {
+const MarkdownEdit : React.FC<PropsType> = ({ initValue, indentation }) => {
     const editRef = useRef<any>(null)
     const showRef = useRef<any>(null)
-    const [value, setValue] = useState(props.initValue ? props.initValue : '')  // 编辑框里输入的内容
+    const [value, setValue] = useState('')  // 编辑框里输入的内容
     const [htmlString, setHtmlString] = useState('')    // 渲染对应的htmlString  
     const [fullScreen, setFullScreen] = useState(false)  // 展示区是否全屏
     const [loading, setLoading] = useState(true)  // 展示区是否正在加载中
@@ -152,13 +153,13 @@ export default function MarkdownEdit(props: PropsType) {
                     let item = paragraph[i]
                     let nextStringCount = stringCount + item.length + 1
                     
-                    // 判断选中的段落的前缀是否有4个空格并去除空格进行缩进
+                    // 判断选中的段落的前缀是否有缩进空格并去除空格进行缩进
                     if(nextStringCount > start && stringCount < end) {
-                        let spaces = item.split('    ')  // 判断有多少4个空格
+                        let spaces = item.split(' '.repeat(_indentation))  // 判断有多少个缩进字符
                         // 去前缀空格
                         if(spaces.length !== 1) {
                             spaces.shift();
-                            cancelSpaceCount += 4
+                            cancelSpaceCount += _indentation
                         }
                         else {
                             cancelSpaceCount += spaces[0].length
@@ -166,7 +167,7 @@ export default function MarkdownEdit(props: PropsType) {
                             cancelSpaceCount -= spaces[0].length
                         }
 
-                        let newParagraph = spaces.join('    ')
+                        let newParagraph = spaces.join(' '.repeat(_indentation))
                         paragraph[i] = newParagraph
                         // 获取取消缩进后的光标开始位置和结束位置
                         if(start > stringCount) selectionStart -= item.length - newParagraph.length;
@@ -196,21 +197,21 @@ export default function MarkdownEdit(props: PropsType) {
                 if(start === end) {
                     console.log(start, end);
                     
-                    newValue = value.slice(0, start) + '    ' + value.slice(end);
-                    selectionStart += 4
-                    selectionEnd += 4
+                    newValue = value.slice(0, start) + ' '.repeat(_indentation) + value.slice(end);
+                    selectionStart += _indentation
+                    selectionEnd += _indentation
                 } else {   //  光标选中了文字
                     for(let i = 0; i < len; i++) {
                         let item = paragraph[i]
                         let nextStringCount = stringCount + item.length + 1
                         
-                        // 将选中的每段段落前面加4个空格
+                        // 将选中的每段段落前缩进
                         if(nextStringCount > start && stringCount < end) {
-                            let newParagraph = '    ' + item
-                            addlSpaceCount += 4
+                            let newParagraph = ' '.repeat(_indentation) + item
+                            addlSpaceCount += _indentation
                             paragraph[i] = newParagraph
                             // 获取取消缩进后的光标开始位置和结束位置
-                            if(start > stringCount) selectionStart += 4;
+                            if(start > stringCount) selectionStart += _indentation;
                             if(end < nextStringCount) selectionEnd += addlSpaceCount         
                         } else if(stringCount > end) break;            
     
@@ -257,12 +258,17 @@ export default function MarkdownEdit(props: PropsType) {
     // value改变，驱动htmlString的改变
     useEffect(() => {
         if(mkRenderTimer) clearTimeout(mkRenderTimer);
-        mkRenderTimer = setTimeout(() => setHtmlString(md.render(value)), 200)         
+        mkRenderTimer = setTimeout(() => {
+            setHtmlString(md.render(value))
+            clearTimeout(mkRenderTimer)
+        }, 200)         
     }, [value])
 
     useEffect(() => {
         // 设置历史记录的初始状态
-        historyLink.value = props.initValue ? props.initValue : ''
+        historyLink.value = initValue === undefined ? '' : initValue;
+        changeFunction.initValueChange(initValue === undefined ? _initValue : initValue)
+        changeFunction.indentationChange(indentation === undefined ? _indentation : indentation)
     }, [])
 
     return (
@@ -302,3 +308,5 @@ export default function MarkdownEdit(props: PropsType) {
         </MarkdownEditContainer>
     )
 }
+
+export default MarkdownEdit

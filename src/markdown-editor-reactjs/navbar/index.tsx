@@ -24,13 +24,13 @@ interface PropsType {
     setLoading: (loading: boolean) => void;
 }
 
-export default function NavBar(props: PropsType) {
+const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScreen, setLoading, fullScreen }) => {
     const [codeHighLightTheme, setCodeHighLightTheme] = useState('railscasts')  // 当前代码高亮的主题
     const [markdownTheme, setMarkdownTheme] = useState('maize')  // 当前markdown的主题
 
     // 代码块的列表元素
     const codeBlockMenu = (
-        <Menu onClick={({ key }) => addCodeBlock(props.editElement.current, props.setValue, props.value, key)}>
+        <Menu onClick={({ key }) => addCodeBlock(editElement.current, setValue, value, key)}>
             <ItemGroup title="代码块语言" className="item-group-list-container">
                 <Item key="js">JavaScript</Item>
                 <Item key="ts">TypeScript</Item>
@@ -56,7 +56,7 @@ export default function NavBar(props: PropsType) {
 
     // 选择代码高亮主题
     const selectCodeHighLightTheme = useCallback(({ key }) => {  
-        props.setLoading(true)   
+        setLoading(true)   
         setCodeHighLightTheme(key)
     }, [])
     
@@ -83,7 +83,7 @@ export default function NavBar(props: PropsType) {
 
     // 选择markdown主题
     const selectMarkdownTheme = ({ key } : { key: string }) => {
-        props.setLoading(true)
+        setLoading(true)
         setMarkdownTheme(key)
     }
 
@@ -112,8 +112,8 @@ export default function NavBar(props: PropsType) {
     // 导出md文件
     const exportMd = () => {
         if(!Blob || !URL) return message.error('浏览器不支持导出md文件，请更换浏览器再试');
-        if(!props.value) return message.warning('当前内容为空，无需导出');
-        let blob = new Blob([props.value])
+        if(!value) return message.warning('当前内容为空，无需导出');
+        let blob = new Blob([value])
         let a = document.createElement('a')
         let downloadURL = URL.createObjectURL(blob)
         a.href = downloadURL
@@ -136,7 +136,7 @@ export default function NavBar(props: PropsType) {
             let reader = new FileReader()
             reader.readAsText(files[0])
             reader.onload = () => {
-                props.setValue(reader.result as string, 0, 0)
+                setValue(reader.result as string, 0, 0)
                 message.success('导入成功')
             }
         })
@@ -168,9 +168,9 @@ export default function NavBar(props: PropsType) {
         newLink.setAttribute('type', 'text/css')
         newLink.setAttribute('class', 'highlightjs-style-link')
         newLink.setAttribute('href', `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/${codeHighLightTheme}.min.css`)
-        newLink.onload = () => props.setLoading(false);
+        newLink.onload = () => setLoading(false);
         newLink.onerror = () => {
-            props.setLoading(false);
+            setLoading(false);
             message.error('主题获取失败，请稍后重试或尝试其它主题')
         }
         head.appendChild(newLink)
@@ -189,9 +189,9 @@ export default function NavBar(props: PropsType) {
         newLink.setAttribute('type', 'text/css')
         newLink.setAttribute('class', 'markdownTheme-style-link')
         newLink.setAttribute('href', `http://lpyexplore.gitee.io/taobao_staticweb/css/theme/${markdownTheme}.css`)
-        newLink.onload = () => props.setLoading(false);
+        newLink.onload = () => setLoading(false);
         newLink.onerror = () => {
-            props.setLoading(false);
+            setLoading(false);
             message.error('主题获取失败，请稍后重试或尝试其它主题')
         }
         head.appendChild(newLink)
@@ -200,22 +200,22 @@ export default function NavBar(props: PropsType) {
     return (
         <NavBarContainer>
             <Tooltip title='加粗' arrowPointAtCenter>
-                <BoldOutlined className="item" onClick={() => handleTwoSideSymbol(props.editElement.current, props.setValue, props.value, '**', '加粗字体')}/>
+                <BoldOutlined className="item" onClick={() => handleTwoSideSymbol(editElement.current, setValue, value, '**', '加粗字体')}/>
             </Tooltip>
             <Tooltip title='斜体' arrowPointAtCenter>
-                <ItalicOutlined className="item" onClick={() => handleTwoSideSymbol(props.editElement.current, props.setValue, props.value, '*', '倾斜字体')}/>
+                <ItalicOutlined className="item" onClick={() => handleTwoSideSymbol(editElement.current, setValue, value, '*', '倾斜字体')}/>
             </Tooltip>
             <Tooltip title='删除线' arrowPointAtCenter>
-                <StrikethroughOutlined className="item" onClick={() => handleTwoSideSymbol(props.editElement.current, props.setValue, props.value, '~~', '删除文本')}/>
+                <StrikethroughOutlined className="item" onClick={() => handleTwoSideSymbol(editElement.current, setValue, value, '~~', '删除文本')}/>
             </Tooltip>
             <Tooltip title='有序列表' arrowPointAtCenter>
-                <OrderedListOutlined className="item" onClick={() => addList(props.editElement.current, props.setValue, props.value, '1.', '有序列表')}/>
+                <OrderedListOutlined className="item" onClick={() => addList(editElement.current, setValue, value, '1.', '有序列表')}/>
             </Tooltip>
             <Tooltip title='无序列表' arrowPointAtCenter>
-                <UnorderedListOutlined className="item" onClick={() => addList(props.editElement.current, props.setValue, props.value, '-', '无序列表')}/>
+                <UnorderedListOutlined className="item" onClick={() => addList(editElement.current, setValue, value, '-', '无序列表')}/>
             </Tooltip>
             <Tooltip title='任务列表' arrowPointAtCenter>
-                <CarryOutOutlined className="item" onClick={() => addList(props.editElement.current, props.setValue, props.value, '- [x]', '任务列表')}/>
+                <CarryOutOutlined className="item" onClick={() => addList(editElement.current, setValue, value, '- [x]', '任务列表')}/>
             </Tooltip>
             <Dropdown 
                 overlay={codeBlockMenu} 
@@ -227,13 +227,13 @@ export default function NavBar(props: PropsType) {
                 </span>
             </Dropdown>
             <Tooltip title='超链接' arrowPointAtCenter>
-                <LinkOutlined className="item" onClick={() => addLink(props.editElement.current, props.setValue, props.value)}/>
+                <LinkOutlined className="item" onClick={() => addLink(editElement.current, setValue, value)}/>
             </Tooltip>
             <Tooltip title='表格' arrowPointAtCenter>
-                <TableOutlined className="item" onClick={() => addTable(props.editElement.current, props.setValue, props.value)}/>
+                <TableOutlined className="item" onClick={() => addTable(editElement.current, setValue, value)}/>
             </Tooltip>
             <Tooltip title='图片' arrowPointAtCenter>
-                <PictureOutlined className="item" onClick={() => addPhoto(props.editElement.current, props.setValue, props.value)}/>
+                <PictureOutlined className="item" onClick={() => addPhoto(editElement.current, setValue, value)}/>
             </Tooltip> 
             <Dropdown 
                 overlay={markdownThemeMenu} 
@@ -258,15 +258,17 @@ export default function NavBar(props: PropsType) {
             </Dropdown>
             <section className="right">
                 {
-                    props.fullScreen
+                    fullScreen
                     ? <Tooltip title='退出全屏' arrowPointAtCenter>
-                        <CompressOutlined className="item" onClick={() => {props.setFullScreen(false);message.info('退出全屏模式')}}/>
+                        <CompressOutlined className="item" onClick={() => {setFullScreen(false);message.info('退出全屏模式')}}/>
                       </Tooltip>
                     : <Tooltip title='进入全屏' arrowPointAtCenter>
-                        <ExpandOutlined className="item" onClick={() => {props.setFullScreen(true);message.info('进入全屏模式')}}/>
+                        <ExpandOutlined className="item" onClick={() => {setFullScreen(true);message.info('进入全屏模式')}}/>
                       </Tooltip>
                 }
             </section>
         </NavBarContainer>
     )
 }
+
+export default NavBar
