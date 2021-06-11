@@ -2,7 +2,6 @@ import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { Spin } from 'antd'
 import { MarkdownEditContainer } from './style/style'
 import NavBar from './navbar/index'
-import PropTypes from 'prop-types'
 import 'antd/dist/antd.css';
 import './style/global.css'
 import { 

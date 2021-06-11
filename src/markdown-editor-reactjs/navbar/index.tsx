@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useCallback, useState, useEffect, useMemo } from 'react'
 import { NavBarContainer } from './style'
 import { Tooltip, Dropdown, Menu, message } from 'antd'
 import { 
@@ -61,7 +61,7 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
     }, [])
     
     // 代码高亮选择菜单
-    const codeHighLightMenu = (
+    const codeHighLightMenu = useMemo(() => (
         <Menu onClick={selectCodeHighLightTheme}>
             <ItemGroup title="代码高亮主题" className="item-group-list-container code-highlight-theme-menu">
                 <Item key="github" className={`${codeHighLightTheme === 'github' && 'active'}`}>github</Item>
@@ -79,7 +79,7 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
                 <Item key="agate" className={`${codeHighLightTheme === 'agate' && 'active'}`}>agate</Item>
             </ItemGroup>
         </Menu>
-    )
+    ), [selectCodeHighLightTheme])
 
     // 选择markdown主题
     const selectMarkdownTheme = ({ key } : { key: string }) => {
@@ -88,14 +88,14 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
     }
 
     // markdown主题选择菜单
-    const markdownThemeMenu = (
+    const markdownThemeMenu = useMemo(() => (
         <Menu onClick={selectMarkdownTheme}>
             <ItemGroup title="markdown主题" className="item-group-list-container markdown-theme-menu">
                 <Item key="github" className={`${markdownTheme === 'github' && 'active'}`}>github</Item>
                 <Item key="maize" className={`${markdownTheme === 'maize' && 'active'}`}>maize</Item>
             </ItemGroup>
         </Menu>
-    )
+    ), [selectMarkdownTheme])
 
     // 控制「更多」中的按钮的点击
     const handleMoreFunction = useCallback(({ key }) => {
@@ -143,7 +143,7 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
     }
 
     // 更多菜单
-    const moreMenu = (
+    const moreMenu = useMemo(() => (
         <Menu onClick={handleMoreFunction}>
             <Item key="importMd">
                 <UploadOutlined />
@@ -154,7 +154,7 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
                 导出md
             </Item>
         </Menu>
-    )
+    ), [handleMoreFunction])
     
     // 切换代码高亮主题
     useEffect(() => {
