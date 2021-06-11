@@ -12,6 +12,10 @@ import {
     EllipsisOutlined, DownloadOutlined, UploadOutlined, ExpandOutlined,
     CompressOutlined,  
 } from '@ant-design/icons'
+import {
+    _bold, _italic, _deleteLine, _disorderList, _orderlyList,
+    _taskList, _link, _table, _photo, _codeBlock, 
+} from '../config'
 
 const { Item, ItemGroup } = Menu
 
@@ -199,24 +203,43 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
 
     return (
         <NavBarContainer>
+        {
+            _bold && 
             <Tooltip title='加粗' arrowPointAtCenter>
                 <BoldOutlined className="item" onClick={() => handleTwoSideSymbol(editElement.current, setValue, value, '**', '加粗字体')}/>
             </Tooltip>
+        }
+        {   _italic &&
             <Tooltip title='斜体' arrowPointAtCenter>
                 <ItalicOutlined className="item" onClick={() => handleTwoSideSymbol(editElement.current, setValue, value, '*', '倾斜字体')}/>
             </Tooltip>
+        }
+        {
+            _deleteLine &&
             <Tooltip title='删除线' arrowPointAtCenter>
                 <StrikethroughOutlined className="item" onClick={() => handleTwoSideSymbol(editElement.current, setValue, value, '~~', '删除文本')}/>
             </Tooltip>
+        }
+        {
+            _disorderList &&
             <Tooltip title='有序列表' arrowPointAtCenter>
                 <OrderedListOutlined className="item" onClick={() => addList(editElement.current, setValue, value, '1.', '有序列表')}/>
             </Tooltip>
+        }
+        {
+            _orderlyList &&
             <Tooltip title='无序列表' arrowPointAtCenter>
                 <UnorderedListOutlined className="item" onClick={() => addList(editElement.current, setValue, value, '-', '无序列表')}/>
             </Tooltip>
+        }
+        {
+            _taskList &&
             <Tooltip title='任务列表' arrowPointAtCenter>
                 <CarryOutOutlined className="item" onClick={() => addList(editElement.current, setValue, value, '- [x]', '任务列表')}/>
             </Tooltip>
+        }
+        {
+            _codeBlock &&
             <Dropdown 
                 overlay={codeBlockMenu} 
                 placement="bottomCenter" 
@@ -226,15 +249,25 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
                     <LeftOutlined />/<RightOutlined/>
                 </span>
             </Dropdown>
+        }
+        {
+            _link &&
             <Tooltip title='超链接' arrowPointAtCenter>
                 <LinkOutlined className="item" onClick={() => addLink(editElement.current, setValue, value)}/>
             </Tooltip>
+        }
+        {
+            _table &&
             <Tooltip title='表格' arrowPointAtCenter>
                 <TableOutlined className="item" onClick={() => addTable(editElement.current, setValue, value)}/>
             </Tooltip>
+        } 
+        {
+            _photo &&
             <Tooltip title='图片' arrowPointAtCenter>
                 <PictureOutlined className="item" onClick={() => addPhoto(editElement.current, setValue, value)}/>
             </Tooltip> 
+        }
             <Dropdown 
                 overlay={markdownThemeMenu} 
                 placement="bottomCenter" 

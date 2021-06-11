@@ -19,7 +19,11 @@ let historyTimer: any;  // 记录历史输入内容的定时器
 let mkRenderTimer: any;  // markdown渲染的定时器
 let historyLink: historyLinkType = { value: '', pre: null, next: null, selectionStart: 0, selectionEnd: 0 }   // 存储表单历史输入内容的双向链表
 
-const MarkdownEdit : React.FC<PropsType> = ({ initValue, indentation }) => {
+const MarkdownEdit : React.FC<PropsType> = (props) => {
+    const { initValue = '', indentation = 4, bold = true, italic = true, deleteLine = true, 
+            disorderList = true, orderlyList = true, taskList = true, link = true, table = true, 
+            photo = true, codeBlock = true, 
+    } = props
     const editRef = useRef<any>(null)
     const showRef = useRef<any>(null)
     const [value, setValue] = useState('')  // 编辑框里输入的内容
@@ -257,6 +261,22 @@ const MarkdownEdit : React.FC<PropsType> = ({ initValue, indentation }) => {
         recordCursorHistoryByElement(historyLink, e.target)
     }, [])
 
+    // 修改编辑器的配置变量
+    const configChange = useCallback(() => {
+        changeFunction.initValueChange(initValue)
+        changeFunction.indentationChange(indentation)
+        changeFunction.boldChange(bold)
+        changeFunction.italicChange(italic)
+        changeFunction.deleteLineChange(deleteLine)
+        changeFunction.disorderListChange(disorderList)
+        changeFunction.orderlyListChange(orderlyList)
+        changeFunction.taskListChange(taskList)
+        changeFunction.linkChange(link)
+        changeFunction.tableChange(table)
+        changeFunction.photoChange(photo)
+        changeFunction.codeBlockChange(codeBlock)
+    }, [])
+
     // value改变，驱动htmlString的改变
     useEffect(() => {
         if(mkRenderTimer) clearTimeout(mkRenderTimer);
@@ -267,17 +287,14 @@ const MarkdownEdit : React.FC<PropsType> = ({ initValue, indentation }) => {
     }, [value])
 
     useEffect(() => {
-        let __initValue = initValue === undefined ? '' : initValue;
-        let __indentation = indentation === undefined ? _indentation : indentation
         // 设置历史记录的初始状态
-        historyLink.value = __initValue
+        historyLink.value = initValue
         // 初始化编辑区内容
-        setValue(__initValue)
+        setValue(initValue)
         /* 修改配置变量 */
-        changeFunction.initValueChange(__initValue)
-        changeFunction.indentationChange(__indentation)
+        configChange()
         // 初次进入聚焦编辑区
-        let totalLen = __initValue.length
+        let totalLen = initValue.length
         setSelectionRange(editRef.current, totalLen, totalLen)
         recordCursorHistoryByPosition(historyLink, totalLen, totalLen)
     }, [])
