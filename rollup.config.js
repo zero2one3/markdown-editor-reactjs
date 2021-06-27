@@ -1,9 +1,9 @@
 import babel from 'rollup-plugin-babel'  // babel处理es6代码的转换
-import commonjs from 'rollup-plugin-commonjs'  // 解决rollup无法识别commonjs的问题
+import commonjs from '@rollup/plugin-commonjs'  // 解决rollup无法识别commonjs的问题
 import postcss from 'rollup-plugin-postcss'  // postcss处理css文件
 import nodePolyfills from 'rollup-plugin-node-polyfills';
 import typescript from 'rollup-plugin-typescript2'
-import resolve from 'rollup-plugin-node-resolve';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import json from '@rollup/plugin-json'
 import terser from 'rollup-plugin-terser'
 
@@ -22,6 +22,10 @@ export default {
                 "@babel/plugin-external-helpers"
             ]
         }),
+        nodeResolve({
+            extensions: ['.js', '.jsx', '.ts', '.tsx'],
+            browser: true,
+        }),
         commonjs({
             include: "node_modules/**"
         }),
@@ -32,13 +36,10 @@ export default {
         }),
         typescript(),
         nodePolyfills(),
-        resolve({
-            extensions: ['.js', '.jsx', '.ts', '.tsx']
-        }),
         json(),
         env === 'production' && terser(),  // 生产环境打包时压缩代码
     ],
-    external: ['react', '@ant-design/icons', 'antd', 'styled-components', 'react-dom'],
+    external: ['react', 'react-dom'],
     onwarn: function (warning) {
         if(warning.code === 'THIS_IS_UNDEFINED') return;
     }

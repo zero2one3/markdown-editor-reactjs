@@ -1,6 +1,6 @@
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
-const MarkdownItTaskCheckbox = require('markdown-it-task-checkbox')
+import MarkdownItTaskCheckbox from './markdown-it-task-checkbox'
 
 const md: any = new MarkdownIt({
     breaks: true,   // 自动换行
