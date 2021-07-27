@@ -1,0 +1,1 @@
+export const INDENTATION: number = 4
