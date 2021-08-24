@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useState, useCallback, useRef, useEffect, useReducer } from 'react'
 import { Spin } from 'antd'
 import { MarkdownEditContainer } from './style/style'
 import NavBar from './navbar/index'
@@ -19,8 +19,23 @@ let historyTimer: any;  // 记录历史输入内容的定时器
 let mkRenderTimer: any;  // markdown渲染的定时器
 let historyLink: historyLinkType = { value: '', pre: null, next: null, selectionStart: 0, selectionEnd: 0 }   // 存储表单历史输入内容的双向链表
 
+// const initialState = { 
+//     value: '',    // 编辑区的内容
+//     htmlString: '',   // 展示区的内容
+//     InFullScreen: false,  // 是否处于全屏状态
+//     loading: false,   // 页面是否在加载中
+// }
+
+// function reducer (state: any, action: any) {
+//     switch(action.type) {
+//         case 'toggleLoading':
+//             return { ...state, loading:  }
+//     }
+// }
+
 const MarkdownEdit : React.FC<PropsType> = (props) => {
     const { value, setValue } = props
+    // const [state, dispatch] = useReducer<any>(reducer, initialState)
     const editRef = useRef<any>(null)
     const showRef = useRef<any>(null)
     const [htmlString, setHtmlString] = useState('')    // 渲染对应的htmlString  

@@ -18,6 +18,11 @@ export function hash(len: number = 10) {
     return hashString
 }
 
+// 进行一些操作前的判断逻辑（全屏模式下不该执行的操作）
+export function shouldImplementInFullScreen () {
+    
+}
+
 // 获取光标位置
 export function getCursorPosition(el: HTMLTextAreaElement) {
     let { selectionStart, selectionEnd } = el
