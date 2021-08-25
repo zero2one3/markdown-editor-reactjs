@@ -17,7 +17,7 @@ const { Item, ItemGroup } = Menu
 
 interface PropsType {
     value: string;
-    setValue: (value: string, selectionStart: number, selectionEnd: number) => void;
+    setValue: Function;
     editElement: any;
     fullScreen: boolean;
     setFullScreen: (fullScreen: boolean) => void;
@@ -136,7 +136,7 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
             let reader = new FileReader()
             reader.readAsText(files[0])
             reader.onload = () => {
-                setValue(reader.result as string, 0, 0)
+                setValue(reader.result as string)
                 message.success('导入成功')
             }
         })

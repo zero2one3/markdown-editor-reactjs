@@ -86,19 +86,19 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
         if(metaKey || ctrlKey) {  // ctrl 开头的组合按键
             if(altKey) {
                 if(keyCode === 84) {  // ctrl + alt + t 表格
-                    addTable(editRef.current, wrapSetValue, value)
+                    addTable(editRef.current, setValue, value)
                     event.preventDefault()
                 } else if(keyCode === 67) {  // ctrl + alt + c 代码块
-                    addCodeBlock(editRef.current, wrapSetValue, value, '')
+                    addCodeBlock(editRef.current, setValue, value, '')
                     event.preventDefault()
                 } else if(keyCode === 86) {   // ctrl + alt + v  行内代码
-                    handleTwoSideSymbol(editRef.current, wrapSetValue, value, '`', "行内代码")
+                    handleTwoSideSymbol(editRef.current, setValue, value, '`', "行内代码")
                     event.preventDefault()
                 } else if(keyCode === 76) {  // ctrl + alt + l  图片链接格式
-                    addPhoto(editRef.current, wrapSetValue, value)
+                    addPhoto(editRef.current, setValue, value)
                     event.preventDefault()
                 } else if(keyCode === 85) {   // ctrl + alt + u  无序列表
-                    addList(editRef.current, wrapSetValue, value, '-', '无序列表')
+                    addList(editRef.current, setValue, value, '-', '无序列表')
                     event.preventDefault()
                 }
             } else {
@@ -117,40 +117,40 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
                     setSelectionRange(el, selectionStart, selectionEnd)
                     event.preventDefault()
                 } else if(keyCode === 66) {   // ctrl + b 加粗
-                    handleTwoSideSymbol(editRef.current, wrapSetValue, value, '**', "加粗字体")
+                    handleTwoSideSymbol(editRef.current, setValue, value, '**', "加粗字体")
                     event.preventDefault()
                 } else if(keyCode === 73) {   // ctrl + i 斜体
-                    handleTwoSideSymbol(editRef.current, wrapSetValue, value, '*', "倾斜字体")
+                    handleTwoSideSymbol(editRef.current, setValue, value, '*', "倾斜字体")
                     event.preventDefault()
                 } else if(keyCode === 85) {  // ctrl + u 删除线
-                    handleTwoSideSymbol(editRef.current, wrapSetValue, value, '~~', "删除文本")
+                    handleTwoSideSymbol(editRef.current, setValue, value, '~~', "删除文本")
                     event.preventDefault()
                 } else if(keyCode === 76) {   // ctrl + l 链接
-                    addLink(editRef.current, wrapSetValue, value)
+                    addLink(editRef.current, setValue, value)
                     event.preventDefault()
                 } else if(keyCode === 79) {   // ctrl + o  无序列表
-                    addList(editRef.current, wrapSetValue, value, '1.', '有序列表')
+                    addList(editRef.current, setValue, value, '1.', '有序列表')
                     event.preventDefault()
                 } else if(keyCode === 81) {   // ctrl + q  引用 （有点问题）
-                    addQuote(editRef.current, wrapSetValue, value)
+                    addQuote(editRef.current, setValue, value)
                     event.preventDefault()
                 } else if(keyCode === 49) {   // ctrl + 1  一级标题
-                    addTitle(editRef.current, wrapSetValue, value, '#', "一级标题")
+                    addTitle(editRef.current, setValue, value, '#', "一级标题")
                     event.preventDefault()
                 } else if(keyCode === 50) {   // ctrl + 2  二级标题
-                    addTitle(editRef.current, wrapSetValue, value, '##', "二级标题")
+                    addTitle(editRef.current, setValue, value, '##', "二级标题")
                     event.preventDefault()
                 } else if(keyCode === 51) {   // ctrl + 3  三级标题
-                    addTitle(editRef.current, wrapSetValue, value, '###', "三级标题")
+                    addTitle(editRef.current, setValue, value, '###', "三级标题")
                     event.preventDefault()
                 } else if(keyCode === 52) {   // ctrl + 4  四级标题
-                    addTitle(editRef.current, wrapSetValue, value, '####', "四级标题")
+                    addTitle(editRef.current, setValue, value, '####', "四级标题")
                     event.preventDefault()
                 } else if(keyCode === 53) {   // ctrl + 5  五级标题
-                    addTitle(editRef.current, wrapSetValue, value, '#####', "五级标题")
+                    addTitle(editRef.current, setValue, value, '#####', "五级标题")
                     event.preventDefault()
                 } else if(keyCode === 54) {   // ctrl + 6  六级标题
-                    addTitle(editRef.current, wrapSetValue, value, '######', "六级标题")
+                    addTitle(editRef.current, setValue, value, '######', "六级标题")
                     event.preventDefault()
                 }
             }
@@ -193,7 +193,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
 
                 let newValue = paragraph.join('\n')
 
-                wrapSetValue(newValue, selectionStart, selectionEnd)
+                setValue(newValue)
                 setSelectionRange(el, selectionStart, selectionEnd)
                 event.preventDefault()
             }
@@ -232,27 +232,29 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
                     newValue = paragraph.join('\n')
                 }
                 
-                wrapSetValue(newValue, selectionStart, selectionEnd)
+                setValue(newValue)
                 setSelectionRange(el, selectionStart, selectionEnd)
                 event.preventDefault()
             }
         }
     }
 
-    // 包装过后的setValue（能记录历史操作记录）
-    const wrapSetValue = useCallback((event, start?: number, end?: number) => {
-        let value = event;
-        let selectionStart = start as number
-        let selectionEnd = end as number
-        if(typeof event !== 'string') {
-            value = event.target.value
-            let [start, end] = getCursorPosition(event.target)
-            selectionStart = start
-            selectionEnd = end 
-        }
-        
-        setValue(value)
+    // 编辑区的点击事件
+    const editClick = useCallback((e) => {
+        recordCursorHistoryByElement(historyLink, e.target)
+    }, [])
 
+    // value改变时做的一些操作
+    useEffect(() => {
+        // value改变，驱动htmlString的改变
+        if(mkRenderTimer) clearTimeout(mkRenderTimer);
+        mkRenderTimer = setTimeout(() => {
+            setHtmlString(md.render(value))
+            clearTimeout(mkRenderTimer)
+        }, 200) 
+        
+        // 记录历史记录
+        let [selectionStart, selectionEnd] = getCursorPosition(editRef.current)
         if(historyTimer) clearTimeout(historyTimer);
         historyTimer = setTimeout(() => {
             historyLink.next = {
@@ -265,20 +267,6 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
             historyLink = historyLink.next
             clearTimeout(historyTimer)
         }, 1000)
-    }, [])
-
-    // 编辑区的点击事件
-    const editClick = useCallback((e) => {
-        recordCursorHistoryByElement(historyLink, e.target)
-    }, [])
-
-    // value改变，驱动htmlString的改变
-    useEffect(() => {
-        if(mkRenderTimer) clearTimeout(mkRenderTimer);
-        mkRenderTimer = setTimeout(() => {
-            setHtmlString(md.render(value))
-            clearTimeout(mkRenderTimer)
-        }, 200)         
     }, [value])
 
     useEffect(() => {
@@ -297,7 +285,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
             <NavBar
                 value={value}
                 editElement={editRef}
-                setValue={wrapSetValue}
+                setValue={setValue}
                 fullScreen={fullScreen}
                 setFullScreen={setFullScreen}
                 setLoading={setLoading}
@@ -313,7 +301,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
                         className={`${fullScreen ? 'hide' : ''}`} 
                         ref={editRef}
                         onClick={editClick}
-                        onChange={wrapSetValue}
+                        onChange={e => setValue(e.target.value)}
                         onScroll={handleScroll}
                         onKeyDown={handleKeyUp}
                         value={value}
