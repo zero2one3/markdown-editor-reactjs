@@ -19,7 +19,7 @@ const { Item, ItemGroup } = Menu
 
 interface PropsType {
     state: StateType;
-    dispatch: React.Dispatch<{ type: string, payload: any }>;
+    dispatch: React.Dispatch<{ type: string, payload?: any }>;
     value: string;
     setValue: Function;
     editElement: any;
@@ -126,10 +126,13 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, state, disp
         })
     }
 
-    const modeTabClick = (newMode: ModeType) => dispatch({
-        type: 'toggleMode',
-        payload: state.mode === newMode ? ModeType.NORMAL : newMode,
-    })
+    const modeTabClick = (newMode: ModeType) => {
+        dispatch({
+            type: 'toggleMode',
+            payload: state.mode === newMode ? ModeType.NORMAL : newMode,
+        })
+        dispatch({ type: 'toggleTOC', payload: false });
+    }
 
     // 更多菜单
     const moreMenu = useMemo(() => (
@@ -248,8 +251,8 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, state, disp
             <section className="right">
                 <Tooltip title='目录' arrowPointAtCenter>
                     <MenuOutlined 
-                        className={`item ${state.mode === ModeType.EDIT ? 'active' : ''}`} 
-                        onClick={() => modeTabClick(ModeType.EDIT)}
+                        className={`item ${state.showTOC ? 'active' : ''}`} 
+                        onClick={() => dispatch({ type: 'toggleTOC' })}
                     />
                 </Tooltip>
                 <Tooltip title='仅编辑' arrowPointAtCenter>

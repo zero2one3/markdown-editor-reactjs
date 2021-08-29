@@ -2,12 +2,14 @@ export interface PropsType {
     value: string;         // markdown的文本
     setValue: Function;   // 修改value的值
     mode?: ModeType;  //  编辑器模式
+    showTOC?: boolean;   // 是否展示目录
 }
 
 export interface StateType {
     loading: boolean;    // 当前页面是否加载
     mode: ModeType;      // 编辑器的模式
     htmlString: string;  // 展示区的dom字符串
+    showTOC: boolean;    // 是否展示目录
 }
 
 // 编辑器模式

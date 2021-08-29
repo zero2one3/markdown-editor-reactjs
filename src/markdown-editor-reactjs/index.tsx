@@ -21,7 +21,7 @@ let historyLink: HistoryLinkType = { value: '', pre: null, next: null, selection
 
 type ReducerType = (
     state: StateType,
-    { type, payload }: { type: string, payload: any }
+    { type, payload }: { type: string, payload?: any }
 ) => StateType;
 
 const reducer: ReducerType = ( state, { type, payload } ) => {
@@ -31,7 +31,9 @@ const reducer: ReducerType = ( state, { type, payload } ) => {
         case 'toggleLoading':
             return { ...state, loading: payload };
         case 'changeHtmlString':
-            return { ...state, htmlString: payload }
+            return { ...state, htmlString: payload };
+        case 'toggleTOC':
+            return { ...state, showTOC: typeof payload === 'undefined' ? !state.showTOC : payload };
     }
     return state
 }
@@ -41,6 +43,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
         value, 
         setValue,
         mode = ModeType.NORMAL,
+        showTOC = true,
     } = props
     const [state, dispatch] = useReducer<ReducerType, StateType>(
         reducer, 
@@ -48,6 +51,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
             htmlString: '',
             mode,
             loading: true,
+            showTOC,
         }, 
         (initState: StateType) => initState
     );
@@ -118,18 +122,22 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
                 }
             } else {
                 if(keyCode === 90) {  // ctrl + z 撤销
-                    if(!historyLink.pre) return event.preventDefault();
-                    let { value, selectionStart, selectionEnd } = historyLink.pre
-                    setValue(value)
-                    historyLink = historyLink.pre
-                    setSelectionRange(el, selectionStart, selectionEnd)
+                    if(!historyLink.pre) return;
+                    else {
+                        let { value, selectionStart, selectionEnd } = historyLink.pre
+                        setValue(value)
+                        historyLink = historyLink.pre
+                        setSelectionRange(el, selectionStart, selectionEnd)
+                    }
                     event.preventDefault()
                 } else if(keyCode === 89) {  // ctrl + Y 前进
-                    if(!historyLink.next) return event.preventDefault();
-                    let { value, selectionStart, selectionEnd } = historyLink.next
-                    setValue(value)
-                    historyLink = historyLink.next
-                    setSelectionRange(el, selectionStart, selectionEnd)
+                    if(!historyLink.next) return;
+                    else {
+                        let { value, selectionStart, selectionEnd } = historyLink.next
+                        setValue(value)
+                        historyLink = historyLink.next
+                        setSelectionRange(el, selectionStart, selectionEnd)
+                    }
                     event.preventDefault()
                 } else if(keyCode === 66) {   // ctrl + b 加粗
                     handleTwoSideSymbol(editRef.current, setValue, value, '**', "加粗字体")
@@ -333,6 +341,13 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
                             ref={showRef}
                             onScroll={handleScroll}
                             dangerouslySetInnerHTML={{ __html: state.htmlString }}
+                        />
+                    }
+                    {
+                        state.showTOC &&
+                        <section
+                            id="__markdown-editor-reactjs-toc"
+                            dangerouslySetInnerHTML={{ __html: md.render('@[toc](目录)') }}
                         />
                     }
                 </main>
