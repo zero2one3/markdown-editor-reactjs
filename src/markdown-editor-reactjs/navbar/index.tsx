@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react'
-import { NavBarContainer } from './style'
+import './index.less'
 import { Tooltip, Dropdown, Menu, message } from 'antd'
 import { 
     hash, handleTwoSideSymbol, addList, addCodeBlock,
@@ -10,21 +10,22 @@ import {
     UnorderedListOutlined, CarryOutOutlined, LinkOutlined, TableOutlined,
     PictureOutlined, LeftOutlined, RightOutlined, BulbOutlined, CodeOutlined,
     EllipsisOutlined, DownloadOutlined, UploadOutlined, ExpandOutlined,
-    CompressOutlined,  
+    InsertRowRightOutlined, InsertRowLeftOutlined, MenuOutlined, 
 } from '@ant-design/icons'
+import { ModeType, CodeBlockType, StateType } from '../types'
+import { CODELANGUAGE } from '../const'
 
 const { Item, ItemGroup } = Menu
 
 interface PropsType {
+    state: StateType;
+    dispatch: React.Dispatch<{ type: string, payload: any }>;
     value: string;
     setValue: Function;
     editElement: any;
-    fullScreen: boolean;
-    setFullScreen: (fullScreen: boolean) => void;
-    setLoading: (loading: boolean) => void;
 }
 
-const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScreen, setLoading, fullScreen }) => {
+const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, state, dispatch }) => {
     const [codeHighLightTheme, setCodeHighLightTheme] = useState('railscasts')  // 当前代码高亮的主题
     const [markdownTheme, setMarkdownTheme] = useState('maize')  // 当前markdown的主题
 
@@ -32,31 +33,14 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
     const codeBlockMenu = (
         <Menu onClick={({ key }) => addCodeBlock(editElement.current, setValue, value, key)}>
             <ItemGroup title="代码块语言" className="item-group-list-container">
-                <Item key="js">JavaScript</Item>
-                <Item key="ts">TypeScript</Item>
-                <Item key="html">HTML</Item>
-                <Item key="css">CSS</Item>
-                <Item key="java">Java</Item>
-                <Item key="bash">Bash</Item>
-                <Item key="c">C</Item>
-                <Item key="csharp">C#</Item>
-                <Item key="c++">C++</Item>
-                <Item key="go">Go</Item>
-                <Item key="json">JSON</Item>
-                <Item key="php">PHP</Item>
-                <Item key="python">Python</Item>
-                <Item key="ruby">Ruby</Item>
-                <Item key="rust">Rust</Item>
-                <Item key="sql">SQL</Item>
-                <Item key="shell">Shell Session</Item>
-                <Item key="vb">Visual Basic</Item>
+            { CODELANGUAGE.map(({ key, language }: CodeBlockType) => <Item key={key}>{ language }</Item>) }
             </ItemGroup>
         </Menu>
     )
 
     // 选择代码高亮主题
     const selectCodeHighLightTheme = useCallback(({ key }) => {  
-        setLoading(true)   
+        dispatch({ type: 'toggleLoading', payload: true })   
         setCodeHighLightTheme(key)
     }, [])
     
@@ -83,7 +67,7 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
 
     // 选择markdown主题
     const selectMarkdownTheme = ({ key } : { key: string }) => {
-        setLoading(true)
+        dispatch({ type: 'toggleLoading', payload: true })
         setMarkdownTheme(key)
     }
 
@@ -124,8 +108,8 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
 
     // 导入md文件
     const importMd = () => {
-        if(!FileReader) return message.error('浏览器不支持导入md文件，请更换浏览器再试')
-        let input = document.createElement('input')
+        if(!FileReader) return message.error('浏览器不支持导入md文件，请更换浏览器再试');
+        let input = document.createElement('input');
         input.type = 'file'
         input.accept = '.md'
         input.click()
@@ -141,6 +125,11 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
             }
         })
     }
+
+    const modeTabClick = (newMode: ModeType) => dispatch({
+        type: 'toggleMode',
+        payload: state.mode === newMode ? ModeType.NORMAL : newMode,
+    })
 
     // 更多菜单
     const moreMenu = useMemo(() => (
@@ -168,9 +157,9 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
         newLink.setAttribute('type', 'text/css')
         newLink.setAttribute('class', 'highlightjs-style-link')
         newLink.setAttribute('href', `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/${codeHighLightTheme}.min.css`)
-        newLink.onload = () => setLoading(false);
+        newLink.onload = () => dispatch({ type: 'toggleLoading', payload: false });
         newLink.onerror = () => {
-            setLoading(false);
+            dispatch({ type: 'toggleLoading', payload: false });
             message.error('主题获取失败，请稍后重试或尝试其它主题')
         }
         head.appendChild(newLink)
@@ -189,16 +178,16 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
         newLink.setAttribute('type', 'text/css')
         newLink.setAttribute('class', 'markdownTheme-style-link')
         newLink.setAttribute('href', `http://lpyexplore.gitee.io/taobao_staticweb/css/theme/${markdownTheme}.css`)
-        newLink.onload = () => setLoading(false);
+        newLink.onload = () => dispatch({ type: 'toggleLoading', payload: false });
         newLink.onerror = () => {
-            setLoading(false);
+            dispatch({ type: 'toggleLoading', payload: false });
             message.error('主题获取失败，请稍后重试或尝试其它主题')
         }
         head.appendChild(newLink)
     }, [markdownTheme])
 
     return (
-        <NavBarContainer>
+        <nav className="__markdown-editor-reactjs-nav-bar">
             <Tooltip title='加粗' arrowPointAtCenter>
                 <BoldOutlined className="item" onClick={() => handleTwoSideSymbol(editElement.current, setValue, value, '**', '加粗字体')}/>
             </Tooltip>
@@ -257,17 +246,32 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, setFullScre
                 <EllipsisOutlined className="item"/>
             </Dropdown>
             <section className="right">
-                {
-                    fullScreen
-                    ? <Tooltip title='退出全屏' arrowPointAtCenter>
-                        <CompressOutlined className="item" onClick={() => {setFullScreen(false);message.info('退出全屏模式')}}/>
-                      </Tooltip>
-                    : <Tooltip title='进入全屏' arrowPointAtCenter>
-                        <ExpandOutlined className="item" onClick={() => {setFullScreen(true);message.info('进入全屏模式')}}/>
-                      </Tooltip>
-                }
+                <Tooltip title='目录' arrowPointAtCenter>
+                    <MenuOutlined 
+                        className={`item ${state.mode === ModeType.EDIT ? 'active' : ''}`} 
+                        onClick={() => modeTabClick(ModeType.EDIT)}
+                    />
+                </Tooltip>
+                <Tooltip title='仅编辑' arrowPointAtCenter>
+                    <InsertRowRightOutlined 
+                        className={`item ${state.mode === ModeType.EDIT ? 'active' : ''}`} 
+                        onClick={() => modeTabClick(ModeType.EDIT)}
+                    />
+                </Tooltip>
+                <Tooltip title='仅预览' arrowPointAtCenter>
+                    <InsertRowLeftOutlined 
+                        className={`item ${state.mode === ModeType.PREVIEW ? 'active' : ''}`}  
+                        onClick={() => modeTabClick(ModeType.PREVIEW)}
+                    />
+                </Tooltip>
+                <Tooltip title='进入全屏' arrowPointAtCenter>
+                    <ExpandOutlined 
+                        className={`item ${state.mode === ModeType.EXHIBITION ? 'active' : ''}`}  
+                        onClick={() => modeTabClick(ModeType.EXHIBITION)}
+                    />
+                </Tooltip>
             </section>
-        </NavBarContainer>
+        </nav>
     )
 }
 

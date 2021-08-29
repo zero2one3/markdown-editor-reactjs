@@ -32,7 +32,8 @@ export default {
         postcss({
             plugins: [
                 require('autoprefixer')({ overrideBrowserslist: ['> 0.15% in CN'] })
-            ]
+            ],
+            less: true
         }),
         typescript(),
         nodePolyfills(),

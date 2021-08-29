@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect, useReducer } from 'react'
 import { Spin } from 'antd'
-import { MarkdownEditContainer } from './style/style'
+import './style/index.less'
 import NavBar from './navbar/index'
 import 'antd/dist/antd.css';
 import './style/global.css'
@@ -10,40 +10,53 @@ import {
     addQuote, recordCursorHistoryByElement, recordCursorHistoryByPosition,
 } from './utils'
 import md from './markdown'
-import { PropsType, historyLinkType } from './types'
+import { PropsType, HistoryLinkType, ModeType, StateType } from './types'
 import { INDENTATION } from './const'
 
 let scrolling: 0 | 1 | 2 = 0   // 当前滚动块。0: both none ; 1: edit ; 2: show
 let scrollTimer: any;  // 改变scrolling值得定时器
 let historyTimer: any;  // 记录历史输入内容的定时器
 let mkRenderTimer: any;  // markdown渲染的定时器
-let historyLink: historyLinkType = { value: '', pre: null, next: null, selectionStart: 0, selectionEnd: 0 }   // 存储表单历史输入内容的双向链表
+let historyLink: HistoryLinkType = { value: '', pre: null, next: null, selectionStart: 0, selectionEnd: 0 }  
 
-// const initialState = { 
-//     value: '',    // 编辑区的内容
-//     htmlString: '',   // 展示区的内容
-//     InFullScreen: false,  // 是否处于全屏状态
-//     loading: false,   // 页面是否在加载中
-// }
-
-// function reducer (state: any, action: any) {
-//     switch(action.type) {
-//         case 'toggleLoading':
-//             return { ...state, loading:  }
-//     }
-// }
+const reducer = (
+    state: StateType, 
+    { type, payload }: { type: string, payload: any },
+): StateType => {
+    switch(type) {
+        case 'toggleMode':
+            return { ...state, mode: payload };
+        case 'toggleLoading':
+            return { ...state, loading: payload };
+        case 'changeHtmlString':
+            return { ...state, htmlString: payload }
+    }
+    return state
+}
 
 const MarkdownEdit : React.FC<PropsType> = (props) => {
-    const { value, setValue } = props
-    // const [state, dispatch] = useReducer<any>(reducer, initialState)
+    const { 
+        value, 
+        setValue,
+        mode = ModeType.NORMAL,
+    } = props
+    const [state, dispatch] = useReducer<(state: StateType, action: { type: string, payload: any }) => StateType, StateType>(
+        reducer, 
+        {
+            htmlString: '',
+            mode,
+            loading: true,
+        }, 
+        (initState: StateType) => initState
+    );
     const editRef = useRef<any>(null)
-    const showRef = useRef<any>(null)
-    const [htmlString, setHtmlString] = useState('')    // 渲染对应的htmlString  
-    const [fullScreen, setFullScreen] = useState(false)  // 展示区是否全屏
-    const [loading, setLoading] = useState(true)  // 展示区是否正在加载中
+    const showRef = useRef<any>(null) 
     
     // 区间进行滚动
     const handleScroll = useCallback((event) => {
+        // 若编辑区和展示区没有同时出现，则无序同步滚动
+        if(state.mode !== ModeType.NORMAL) return;
+
         let { target } = event
         let scale = getScale(target)
  
@@ -57,7 +70,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
             else if(scrolling === 1) return;
             driveScroll(scale, editRef.current)
         }
-    }, [])
+    }, [state.mode])
 
     // 驱动元素进行滚动
     const driveScroll = useCallback((scale: number, el: HTMLElement) => {
@@ -206,7 +219,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
                     len = paragraph.length,
                     addlSpaceCount = 0,
                     newValue = ''
-
+                
                 // 光标未选中文字
                 if(start === end) {
                     newValue = value.slice(0, start) + ' '.repeat(INDENTATION) + value.slice(end);
@@ -249,7 +262,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
         // value改变，驱动htmlString的改变
         if(mkRenderTimer) clearTimeout(mkRenderTimer);
         mkRenderTimer = setTimeout(() => {
-            setHtmlString(md.render(value))
+            dispatch({ type: 'changeHtmlString', payload: md.render(value) })
             clearTimeout(mkRenderTimer)
         }, 200) 
         
@@ -269,6 +282,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
         }, 1000)
     }, [value])
 
+    // 初始化
     useEffect(() => {
         // 设置历史记录的初始状态
         historyLink.value = value
@@ -281,41 +295,47 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
     }, [])
 
     return (
-        <MarkdownEditContainer>
-            <NavBar
-                value={value}
-                editElement={editRef}
-                setValue={setValue}
-                fullScreen={fullScreen}
-                setFullScreen={setFullScreen}
-                setLoading={setLoading}
-            />
+        <div className="__markdown-editor-reactjs-container">
+            {
+                state.mode !== ModeType.EXHIBITION &&
+                <NavBar
+                    value={value}
+                    state={state}
+                    dispatch={dispatch}
+                    editElement={editRef}
+                    setValue={setValue}
+                />
+            }
             <Spin 
-                spinning={loading} 
+                spinning={state.loading} 
                 wrapperClassName="write-spin" 
                 tip="更新主题中..."
             >
-                <main className="markdown-main">
-                    <textarea 
-                        id="markdown-editor-reactjs-edit"
-                        className={`${fullScreen ? 'hide' : ''}`} 
-                        ref={editRef}
-                        onClick={editClick}
-                        onChange={e => setValue(e.target.value)}
-                        onScroll={handleScroll}
-                        onKeyDown={handleKeyUp}
-                        value={value}
-                    />
-                    <div 
-                        id="write"
-                        className={`${fullScreen ? 'fullScreen': ''}`}
-                        ref={showRef}
-                        onScroll={handleScroll}
-                        dangerouslySetInnerHTML={{ __html: htmlString }}
-                    />
+                <main className="__markdown-editor-reactjs-markdown-main">
+                    {
+                        (state.mode === ModeType.NORMAL || state.mode === ModeType.EDIT) &&
+                        <textarea 
+                            id="__markdown-editor-reactjs-edit"
+                            ref={editRef}
+                            onClick={editClick}
+                            onChange={e => setValue(e.target.value)}
+                            onScroll={handleScroll}
+                            onKeyDownCapture={handleKeyUp}
+                            value={value}
+                        />
+                    }
+                    {
+                        state.mode !== ModeType.EDIT &&
+                        <div 
+                            id="write"
+                            ref={showRef}
+                            onScroll={handleScroll}
+                            dangerouslySetInnerHTML={{ __html: state.htmlString }}
+                        />
+                    }
                 </main>
             </Spin>
-        </MarkdownEditContainer>
+        </div>
     )
 }
 

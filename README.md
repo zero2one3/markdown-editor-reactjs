@@ -42,7 +42,7 @@ function App() {
 | ctrl + u | command + u | 删除线 |
 | ctrl + l | command + l | 链接 |
 | ctrl + o | command + o | 有序列表 |
-| ctrl + q | command + q | 引用（暂时有兼容性问题，待处理中） |
+| ctrl + q | command + q | 引用（mac下失效） |
 | ctrl + 1 | command + 1 | 一级标题 |
 | ctrl + 2 | command + 2 | 二级标题 |
 | ctrl + 3 | command + 3 | 三级标题 |

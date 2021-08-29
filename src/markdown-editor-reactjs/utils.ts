@@ -1,4 +1,4 @@
-import { historyLinkType } from './types'
+import { HistoryLinkType } from './types'
 
 // 生成哈希串
 export function hash(len: number = 10) {
@@ -44,14 +44,14 @@ export function setSelectionRange(el: HTMLTextAreaElement, selectionStart: numbe
 }
 
 // 通过当前元素的光标位置记录光标的历史位置
-export function recordCursorHistoryByElement (historyLink: historyLinkType, el: HTMLTextAreaElement) {
+export function recordCursorHistoryByElement (historyLink: HistoryLinkType, el: HTMLTextAreaElement) {
     let [selectionStart, selectionEnd] = getCursorPosition(el)
     historyLink.selectionStart = selectionStart
     historyLink.selectionEnd = selectionEnd
 }
 
 // 通过指定的光标位置记录光标的历史位置
-export function recordCursorHistoryByPosition (historyLink: historyLinkType, selectionStart: number, selectionEnd: number) {
+export function recordCursorHistoryByPosition (historyLink: HistoryLinkType, selectionStart: number, selectionEnd: number) {
     historyLink.selectionStart = selectionStart
     historyLink.selectionEnd = selectionEnd
 }

@@ -19,6 +19,6 @@ li.task-list-item {
 
 /* antd的dropdown组件选中的选项的样式 */
 .code-highlight-theme-menu .active, .markdown-theme-menu .active {
-        background-color: rgb(225, 248, 222);
+        background-color: rgb(245, 245, 245);
         border-radius: 3px;
 }
