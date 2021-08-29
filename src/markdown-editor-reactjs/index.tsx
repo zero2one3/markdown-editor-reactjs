@@ -19,10 +19,12 @@ let historyTimer: any;  // 记录历史输入内容的定时器
 let mkRenderTimer: any;  // markdown渲染的定时器
 let historyLink: HistoryLinkType = { value: '', pre: null, next: null, selectionStart: 0, selectionEnd: 0 }  
 
-const reducer = (
-    state: StateType, 
-    { type, payload }: { type: string, payload: any },
-): StateType => {
+type ReducerType = (
+    state: StateType,
+    { type, payload }: { type: string, payload: any }
+) => StateType;
+
+const reducer: ReducerType = ( state, { type, payload } ) => {
     switch(type) {
         case 'toggleMode':
             return { ...state, mode: payload };
@@ -40,7 +42,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
         setValue,
         mode = ModeType.NORMAL,
     } = props
-    const [state, dispatch] = useReducer<(state: StateType, action: { type: string, payload: any }) => StateType, StateType>(
+    const [state, dispatch] = useReducer<ReducerType, StateType>(
         reducer, 
         {
             htmlString: '',
