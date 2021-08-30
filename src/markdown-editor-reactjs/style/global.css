@@ -22,3 +22,10 @@ li.task-list-item {
         background-color: rgb(245, 245, 245);
         border-radius: 3px;
 }
+
+/*  */
+.__markdown-editor-reactjs-container ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+}

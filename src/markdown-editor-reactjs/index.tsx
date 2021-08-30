@@ -34,6 +34,8 @@ const reducer: ReducerType = ( state, { type, payload } ) => {
             return { ...state, htmlString: payload };
         case 'toggleTOC':
             return { ...state, showTOC: typeof payload === 'undefined' ? !state.showTOC : payload };
+        case 'changeTOC':
+            return { ...state, toc: payload }
     }
     return state
 }
@@ -52,6 +54,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
             mode,
             loading: true,
             showTOC,
+            toc: '<p></p><h3>目录</h3>',
         }, 
         (initState: StateType) => initState
     );
@@ -272,7 +275,15 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
         // value改变，驱动htmlString的改变
         if(mkRenderTimer) clearTimeout(mkRenderTimer);
         mkRenderTimer = setTimeout(() => {
-            dispatch({ type: 'changeHtmlString', payload: md.render(value) })
+            // 带上目录一起渲染
+            let htmlString_withTOC = md.render(`@[toc](目录)\n${value}`)
+            
+            let rst = new RegExp(/^<p>.*<\/p>/).exec(htmlString_withTOC)
+            let toc = rst ? rst[0] : ''
+            let htmlString = htmlString_withTOC.slice(toc.length, -1)
+            
+            dispatch({ type: 'changeHtmlString', payload: htmlString })
+            dispatch({ type: 'changeTOC', payload: toc ? toc : '<p><h3>目录</h3></p>' })
             clearTimeout(mkRenderTimer)
         }, 200) 
         
@@ -322,7 +333,8 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
                 tip="更新主题中..."
             >
                 <main className="__markdown-editor-reactjs-markdown-main">
-                    {
+                    {   
+                        // 编辑区
                         (state.mode === ModeType.NORMAL || state.mode === ModeType.EDIT) &&
                         <textarea 
                             id="__markdown-editor-reactjs-edit"
@@ -335,6 +347,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
                         />
                     }
                     {
+                        // 展示区
                         state.mode !== ModeType.EDIT &&
                         <div 
                             id="write"
@@ -344,10 +357,11 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
                         />
                     }
                     {
+                        // 目录
                         state.showTOC &&
                         <section
                             id="__markdown-editor-reactjs-toc"
-                            dangerouslySetInnerHTML={{ __html: md.render('@[toc](目录)') }}
+                            dangerouslySetInnerHTML={{ __html: state.toc }}
                         />
                     }
                 </main>

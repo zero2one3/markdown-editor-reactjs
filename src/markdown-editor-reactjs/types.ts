@@ -10,6 +10,7 @@ export interface StateType {
     mode: ModeType;      // 编辑器的模式
     htmlString: string;  // 展示区的dom字符串
     showTOC: boolean;    // 是否展示目录
+    toc: string;         // 目录
 }
 
 // 编辑器模式
