@@ -32,12 +32,36 @@
                 box-sizing: border-box;
             }
 
-            #__markdown-editor-reactjs-toc {
+            .__markdown-editor-reactjs-toc-layout {
                 height: 100%;
                 width: 280px;
-                box-sizing: border-box;
-                padding: 20px;
-                border-left: 1px solid #eee;
+                position: relative;
+
+                .toc-close-icon {
+                    width: 22px;
+                    height: 22px;
+                    border-radius: 5px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    position: absolute;
+                    cursor: pointer;
+                    top: 16px;
+                    right: 16px;
+
+                    &:hover {
+                        background-color: rgb(245, 245, 245);
+                    }
+                }
+
+                #__markdown-editor-reactjs-toc {
+                    height: 100%;
+                    width: 100%;
+                    box-sizing: border-box;
+                    padding: 20px;
+                    overflow: auto;
+                    border-left: 1px solid #eee;
+                }
             }
         }
     }

@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useRef, useEffect, useReducer } from 'react'
 import { Spin } from 'antd'
+import { CloseOutlined } from '@ant-design/icons'
 import './style/index.less'
 import NavBar from './navbar/index'
 import 'antd/dist/antd.css';
 import './style/global.css'
+import './style/toc.less'
 import { 
     getCursorPosition, setSelectionRange, handleTwoSideSymbol,
     addTable, addCodeBlock, addLink, addPhoto, addList, addTitle,
@@ -359,10 +361,13 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
                     {
                         // 目录
                         state.showTOC &&
-                        <section
-                            id="__markdown-editor-reactjs-toc"
-                            dangerouslySetInnerHTML={{ __html: state.toc }}
-                        />
+                        <section className="__markdown-editor-reactjs-toc-layout">
+                            <CloseOutlined className="toc-close-icon" onClick={() => dispatch({ type: 'toggleTOC', payload: false })}/>
+                            <div
+                                id="__markdown-editor-reactjs-toc"
+                                dangerouslySetInnerHTML={{ __html: state.toc }}
+                            />
+                        </section>
                     }
                 </main>
             </Spin>
