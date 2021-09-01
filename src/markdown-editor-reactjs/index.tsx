@@ -20,6 +20,7 @@ let scrollTimer: any;  // 改变scrolling值得定时器
 let historyTimer: any;  // 记录历史输入内容的定时器
 let mkRenderTimer: any;  // markdown渲染的定时器
 let historyLink: HistoryLinkType = { value: '', pre: null, next: null, selectionStart: 0, selectionEnd: 0 }  
+let titleObserver: any = null;  // 展示区的标题的监听对象
 
 type ReducerType = (
     state: StateType,
@@ -61,7 +62,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
         (initState: StateType) => initState
     );
     const editRef = useRef<any>(null)
-    const showRef = useRef<any>(null) 
+    const showRef = useRef<any>(null)
     
     // 区间进行滚动
     const handleScroll = useCallback((event) => {
@@ -272,6 +273,29 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
         recordCursorHistoryByElement(historyLink, e.target)
     }, [])
 
+    // 初始化
+    useEffect(() => {
+        // 设置历史记录的初始状态
+        historyLink.value = value
+        // 初始化编辑区内容
+        setValue(value)
+        // 初次进入聚焦编辑区
+        let totalLen = value.length
+        setSelectionRange(editRef.current, totalLen, totalLen)
+        recordCursorHistoryByPosition(historyLink, totalLen, totalLen)
+        // 创建展示区的标题监听对象
+        if(IntersectionObserver) titleObserver = new IntersectionObserver(entries => {
+            let rightIndex = entries[0].isIntersecting ? 0 : entries.length - 1;
+            let active_id = (entries[rightIndex].target.firstChild as HTMLLinkElement).id
+                            
+            console.log(active_id);
+        }, {
+            threshold: 0.001,
+            rootMargin: '0% 0% 100% 0%',
+            root: showRef.current
+        });
+    }, [])
+
     // value改变时做的一些操作
     useEffect(() => {
         // value改变，驱动htmlString的改变
@@ -305,17 +329,10 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
         }, 1000)
     }, [value])
 
-    // 初始化
     useEffect(() => {
-        // 设置历史记录的初始状态
-        historyLink.value = value
-        // 初始化编辑区内容
-        setValue(value)
-        // 初次进入聚焦编辑区
-        let totalLen = value.length
-        setSelectionRange(editRef.current, totalLen, totalLen)
-        recordCursorHistoryByPosition(historyLink, totalLen, totalLen)
-    }, [])
+        // 监听标题元素
+        showRef.current.querySelectorAll("h1, h2, h3, h4, h5, h6").forEach((node: Element) => titleObserver.observe(node))
+    }, [state.htmlString])
 
     return (
         <div className="__markdown-editor-reactjs-container">
