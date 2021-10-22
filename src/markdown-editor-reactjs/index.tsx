@@ -307,7 +307,6 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
             let rst = new RegExp(/^<p>.*<\/p>/).exec(htmlString_withTOC)
             let toc = rst ? rst[0] : ''
             let htmlString = htmlString_withTOC.slice(toc.length, -1)
-            
             dispatch({ type: 'changeHtmlString', payload: htmlString })
             dispatch({ type: 'changeTOC', payload: toc ? toc : '<p><h3>目录</h3></p>' })
             clearTimeout(mkRenderTimer)
