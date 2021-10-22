@@ -11,6 +11,7 @@ export interface StateType {
     htmlString: string;  // 展示区的dom字符串
     showTOC: boolean;    // 是否展示目录
     toc: string;         // 目录
+    activeTitle: string; // 当前处于的标题
 }
 
 // 编辑器模式

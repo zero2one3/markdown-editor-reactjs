@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect, useReducer } from 'react'
+import React, { useCallback, useRef, useEffect, useReducer } from 'react'
 import { Spin } from 'antd'
 import { CloseOutlined } from '@ant-design/icons'
 import './style/index.less'
@@ -19,7 +19,13 @@ let scrolling: 0 | 1 | 2 = 0   // 当前滚动块。0: both none ; 1: edit ; 2: 
 let scrollTimer: any;  // 改变scrolling值得定时器
 let historyTimer: any;  // 记录历史输入内容的定时器
 let mkRenderTimer: any;  // markdown渲染的定时器
-let historyLink: HistoryLinkType = { value: '', pre: null, next: null, selectionStart: 0, selectionEnd: 0 }  
+let historyLink: HistoryLinkType = { 
+    value: '', 
+    pre: null, 
+    next: null, 
+    selectionStart: 0, 
+    selectionEnd: 0 
+}  
 let titleObserver: any = null;  // 展示区的标题的监听对象
 
 type ReducerType = (
@@ -36,9 +42,19 @@ const reducer: ReducerType = ( state, { type, payload } ) => {
         case 'changeHtmlString':
             return { ...state, htmlString: payload };
         case 'toggleTOC':
-            return { ...state, showTOC: typeof payload === 'undefined' ? !state.showTOC : payload };
+            return { 
+                ...state, 
+                showTOC: typeof payload === 'undefined' 
+                            ? !state.showTOC 
+                            : payload 
+                };
         case 'changeTOC':
             return { ...state, toc: payload }
+        case 'changeActiveTitle':
+            const toc = state.toc
+                        .replace('class="active"', '')  // 删除上一个active标题
+                        .replace(`${payload}"`, `${payload}" class="active"`) // 设置此次的active标题
+            return { ...state, activeTitle: payload, toc }
     }
     return state
 }
@@ -57,6 +73,7 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
             mode,
             loading: true,
             showTOC,
+            activeTitle: '',
             toc: '<p></p><h3>目录</h3>',
         }, 
         (initState: StateType) => initState
@@ -287,10 +304,8 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
         if(IntersectionObserver) titleObserver = new IntersectionObserver(entries => {
             let rightIndex = entries[0].isIntersecting ? 0 : entries.length - 1;
             let active_id = (entries[rightIndex].target.firstChild as HTMLLinkElement).id
-                            
-            console.log(active_id);
+            dispatch({ type: 'changeActiveTitle', payload: active_id })
         }, {
-            threshold: 0.001,
             rootMargin: '0% 0% 100% 0%',
             root: showRef.current
         });
