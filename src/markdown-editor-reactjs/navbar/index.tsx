@@ -180,7 +180,7 @@ const NavBar: React.FC<PropsType> = ({ editElement, setValue, value, state, disp
         newLink.setAttribute('rel', 'stylesheet')
         newLink.setAttribute('type', 'text/css')
         newLink.setAttribute('class', 'markdownTheme-style-link')
-        newLink.setAttribute('href', `http://lpyexplore.gitee.io/taobao_staticweb/css/theme/${markdownTheme}.css`)
+        newLink.setAttribute('href', `https://lpyexplore.gitee.io/taobao_staticweb/css/theme/${markdownTheme}.css`)
         newLink.onload = () => dispatch({ type: 'toggleLoading', payload: false });
         newLink.onerror = () => {
             dispatch({ type: 'toggleLoading', payload: false });
