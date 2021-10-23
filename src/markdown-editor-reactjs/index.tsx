@@ -325,6 +325,8 @@ const MarkdownEdit : React.FC<PropsType> = (props) => {
             dispatch({ type: 'changeHtmlString', payload: htmlString })
             dispatch({ type: 'changeTOC', payload: toc ? toc : '<p><h3>目录</h3></p>' })
             clearTimeout(mkRenderTimer)
+            // 展示区同步滚动
+            driveScroll(getScale(editRef.current), showRef.current)
         }, 200) 
         
         // 记录历史记录
