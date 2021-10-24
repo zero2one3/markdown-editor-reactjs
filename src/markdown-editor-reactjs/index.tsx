@@ -1,11 +1,11 @@
 import React, { useCallback, useRef, useEffect, useReducer } from 'react'
 import { Spin } from 'antd'
 import { CloseOutlined } from '@ant-design/icons'
-import './style/index.less'
 import NavBar from './navbar/index'
+import './styles/index.less'
 import 'antd/dist/antd.css';
-import './style/global.css'
-import './style/toc.less'
+import './styles/global.css'
+import './styles/toc.less'
 import { 
     getCursorPosition, setSelectionRange, handleTwoSideSymbol,
     addTable, addCodeBlock, addLink, addPhoto, addList, addTitle,
